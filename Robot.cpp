@@ -100,12 +100,6 @@ void Robot::forceToSHM() {
   shm->fz = computedForce.z;
 }
 
-void Robot::computedPositionToSHM() {
-  shm_t * shm = getShm();
-  shm->minjerk_x = computedPos.x;
-  shm->minjerk_y = computedPos.y;
-  shm->minjerk_z = computedPos.z;
-}
 
 void Robot::ControllerNull() {
   computedForce.zero();
@@ -143,6 +137,9 @@ void Robot::ControllerMoveToPoint() {
 
     (sh_memory->t)=movt;
     computeInteractions (movt);
+    (sh_memory->minjerk_x) = computedPos.x;
+    (sh_memory->minjerk_y) = computedPos.y;
+    (sh_memory->minjerk_z) = computedPos.z;
     (sh_memory->movet)++;
   }
 }
@@ -173,26 +170,16 @@ int main(int argc, char const *argv[]) {
   Robot robot;
   robot.open_sharedmem();
   robot.openDevice();
-  //robot.mainLoop();
-
-  //printf("Movement duration will be %f",MOVEMENT_DURATION_SAMPLES);
 
   shm_t * sh_memory = robot.getShm();
   sh_memory->controller = 0;
   sh_memory->loop_time = 0;
 
-  //void * pp =;
-  //printf("x %p y %p angle %p\n", &(sh_memory->x), &(sh_memory->y), &(sh_memory->angle));
-  //void *pA = (unsigned int) &(sh_memory->otherquit);
-  //void *pB = &(sh_memory->x);
-
-  //printf("y-x %li\n", pA - pB );
-  //clock_t t = clock();
-
+  
   // We are about to enter the main loop. Now let's compute the time
   // we want to do the next iteration of the loop.
   clock_t t0 = clock() ;
-  clock_t next_iteration_t = t0 + MAIN_LOOP_TIME_S*CLOCKS_PER_SEC ;
+  clock_t next_iteration_t = t0 + (MAIN_LOOP_TIME_S*CLOCKS_PER_SEC) ;
     
   while (robot.keep_going()) {
 
@@ -206,10 +193,7 @@ int main(int argc, char const *argv[]) {
     robot.getPosition(); // positionToSHM()
     //robot.getVelocity(); // velocityToSHM()
 
-    // Execute a particular controller
-    // Lire dans le SHM quel controlleur?
-    // Exec cette controlleur
-
+    // Execute the controller that is currently selected
     switch (sh_memory->controller) {
       case 0/* value */:
         robot.ControllerNull(); break;
@@ -219,9 +203,11 @@ int main(int argc, char const *argv[]) {
         robot.ControllerHoldAtPoint(); break;
     }
 
+    // Apply the forces
     robot.setForce();
+
+    // Update the shared memory
     robot.forceToSHM();
-    robot.computedPositionToSHM();
     robot.writeLog();
 
     // Get the current time

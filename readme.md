@@ -17,15 +17,13 @@ These last can be install easily using the command `sudo apt-get install python-
 
 ## Usage
 
-The robot C++ script (BasicRobot.cpp and Robot.cpp) are in the principal folder (`omega_cpp_py/`) and nedd to be compiled. For this, you need to be in this directory and write this command from the prompt:
-```
-make Robot
-```
+The robot C++ scripts (`BasicRobot.cpp` and `Robot.cpp`) are in the principal folder (`omega_cpp_py/`) and need to be compiled. For this, you need to be in this directory and write this command from the prompt:
 
-This is automatically done when you write the following command from the prompt. But this one actually launchs the python script which is given in the `makefile` script.
 ```
 make
 ```
+
+
 
 You can create your own python script to control the robot using the simple functions in `robot.py`. For example :
 
@@ -69,5 +67,9 @@ IMPORTANT: In the `shared_memory_specification.txt`, you can only put long int o
 
 ## Programmer's notes
 
-Sometimes, when the program is not well-closed, the Robot C++ process can stay opened. In this case, if you execute again the program, it will not be able to open the device. That is why, when you have this problem, you need to kill the Robot process manually from the prompt.
+Sometimes, when the program is not well-closed, the Robot C++ process can stay opened. In this case, if you execute again the program, it will not be able to open the device.
+
+In this case you can try and run `make kill` which will send the robot the instruction to quit through the shared memory.
+
+If for some reason the robot is no longer listening to the shared memory, you need to kill the Robot process manually from the prompt.
 For that, you have to invoke the command `ps -Al`, looking for the robot process' ID and then, you need to do `sudo kill <ID>`.  
