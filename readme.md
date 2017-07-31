@@ -64,6 +64,9 @@ All the files C++ and python need to be in the same folder to be executed.
 To control the robot main loop iteration time (the number of cycles per second) you can adjust `MAIN_LOOP_TIME_S = .0025;` which is defined in `Robot.h`.
 
 
+### Recording a trajectory
+
+Quite simple, call `robot.start_capture()` and some time later, `robot.stop_capture()`, the latter function will return a list of captured positions, coded as a tuple `(x,y,z)`.
 
 
 
@@ -71,6 +74,22 @@ To control the robot main loop iteration time (the number of cycles per second) 
 ## Shared memory
 
 In reality, the robot can only be controlled by a C++ program. But we want to run the experiment with python, that is why we need to use a shared memory. In the `shared_memory_specification.txt` document, we write the parameter that we want to add in the shared memory. `create_c_header.py` creates the C++ header file which contains the structure used by the C++ script to write into the shared memory. The C++ program create a shared memory after having computed the size of this one thanks to the `shared_memory_specification.txt`. From within Python, it is quite easy to access to the shared memory. Actually, to read a parameter, you can use this function `robot.rshm(variable's name)`, and to write in this one, you need to use the function `robot.wshm(variable'name, value)`.
+
+Each line in the `shared_memory_specification.txt` creates one variable in the shared memory. Each variable has a name and a type. The types conform to the `struct` specification in Python ([see here for a specification](https://docs.python.org/2/library/struct.html#format-characters)).
+
+For example, the line
+```
+x d
+```
+
+creates a variable named `x` which has a double floating point precision value.
+
+Lists of values can be created using:
+```
+record_x 4000d
+```
+
+which creates a list of 4000 doubles, for example to hold a trajectory in shared memory.
 
 IMPORTANT: In the `shared_memory_specification.txt`, you can only put long int or double because C++ allocates only trunks of 8 bytes. if you put a int which takes 4 bytes and then a double, the double's address is going to be 4 bytes higher. As it is not the case in python, this is a problem because parameters in the shared memory did not have the same address' offset.  
 

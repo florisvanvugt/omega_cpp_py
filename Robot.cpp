@@ -46,13 +46,11 @@ void Robot::computeVel (double t) {
 }
 
 void Robot::computeInteractions (double t) {
-
     cVector3d localPos (0, 0, 0);
     cVector3d localVel (0, 0, 0);
 
     computePos(t);
     computeVel(t);
-
     computeInteractions ();
 }
 
@@ -109,14 +107,8 @@ void Robot::ControllerNull() {
 void Robot::ControllerMoveToPoint() {
   shm_t * sh_memory = getShm();
 
-  //(sh_memory->mds)=8000.;
   double T = sh_memory->movement_duration;
-  //(sh_memory->mds)=(sh_memory->movement_duration)/.00025;
   (sh_memory->mds)=(sh_memory->movement_duration)/MAIN_LOOP_TIME_S;
-  //sh_memory->main_loop_time = MAIN_LOOP_TIME_S;
-
-  //double MOVEMENT_DURATION_SAMPLES = T/sh_memory->main_loop_time;
-  //(sh_memory->mds)=MOVEMENT_DURATION_SAMPLES;
 
   if ((sh_memory->movet) >= sh_memory->mds) {
     // If the movement is completed, switch back to the null controller...
@@ -132,7 +124,6 @@ void Robot::ControllerMoveToPoint() {
     // to 1 = end of movement.
     // However, move_t tells us which sample we are from the total
     // movement duration (for example 500 our of 1000)
-
     double movt = ((double)sh_memory->movet)/(sh_memory->mds);
 
     (sh_memory->t)=movt;
@@ -144,20 +135,20 @@ void Robot::ControllerMoveToPoint() {
   }
 }
 
+
+
 void Robot::ControllerHoldAtPoint() {
   shm_t * shm = getShm();
-
   computedPos.set(shm->target_x, shm->target_y, shm->target_z);
   computeInteractions();
 }
+
+
 
 void Robot::writeLog(){
   FILE* fp = fopen("log.csv","a");
   shm_t* shm = getShm();
   fprintf(fp, "%f %f %f %f %f %f %li %li\n",shm->x, shm->y, shm->z, computedForce.x, computedForce.y, computedForce.z, shm->controller, shm->quit);
-  //fprintf(fp, "%lu\n", sizeof(int));
-  //fprintf(fp, "%lu\n", sizeof(double));
-  //fprintf(fp, "%lu\n", sizeof(shm_t));
   fclose(fp);
 }
 
@@ -168,13 +159,17 @@ void Robot::writeLog(){
 int main(int argc, char const *argv[]) {
 
   Robot robot;
-  robot.open_sharedmem();
-  robot.openDevice();
 
+  // Initialise the shared memory
+  robot.open_sharedmem();
   shm_t * sh_memory = robot.getShm();
   sh_memory->controller = 0;
   sh_memory->loop_time = 0;
+  // Update the main loop time if so instructed in the shared memory
+  sh_memory->main_loop_time = MAIN_LOOP_TIME_S;
 
+  // Launch the robot
+  robot.openDevice();
   
   // We are about to enter the main loop. Now let's compute the time
   // we want to do the next iteration of the loop.
@@ -183,6 +178,9 @@ int main(int argc, char const *argv[]) {
     
   while (robot.keep_going()) {
 
+    // Update the main loop time if so instructed in the shared memory
+    MAIN_LOOP_TIME_S = (sh_memory->main_loop_time);
+    
     // Get the current time (for loop time computation)
     clock_t t_loop_begin = clock();
 
@@ -209,6 +207,7 @@ int main(int argc, char const *argv[]) {
     // Update the shared memory
     robot.forceToSHM();
     robot.writeLog();
+    robot.flush_sharedmem();
 
     // Get the current time
     clock_t t1 = clock();

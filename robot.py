@@ -17,13 +17,10 @@ def launch():
     """ Launches the robot process."""
     # Launch the C process controlling the robot (which will allocate the shared memory that we will then connect to)
     res = subprocess.call(['./run_robot.sh'])
-    print("subprocess done!")
-
     if (res != 0):
         print("Error in calling main!")
 
-    #Swshm('quit',0)
-
+        
 def load():
     """ Connects to the robot using the shared memory."""
     pass

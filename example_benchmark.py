@@ -17,6 +17,7 @@ if True:
     print("Passed %i samples i.e. loop time %f ms and %i dropped loops"%(it1-it0,
                                                                          T/(it1-it0)*1000,
                                                                          robot.rshm('dropped_iterations')))
+    print("Desired loop time %f ms"%(1000*robot.rshm('main_loop_time')))
 
 
 
