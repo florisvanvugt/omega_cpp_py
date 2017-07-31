@@ -9,9 +9,8 @@ This is a simple interface for the Omega Robot. It is implemented in Python 2 bu
 
 Python 2 with the following modules:
 * `subprocess` which is used to launch the C++ part of the code.
-* `numpy` which is used to create list in python
-* `pygame` for playing a sound to give a report to the subject
-* `mmap` for creating the shared memory and accessing it
+* `numpy` for numeric computation.
+* `mmap` for creating the shared memory and accessing it.
 
 These last can be install easily using the command `sudo apt-get install python-<module's name>`
 
@@ -31,7 +30,6 @@ You can create your own python script to control the robot using the simple func
 ```python
 import robot
 import time
-for sharedmem import *
 
 robot.launch()
 robot.init()
@@ -46,8 +44,6 @@ time.sleep(2) # during 2 seconds
 robot.unload() #Stop the C++ script
 ```
 
-If you want to execute your own python scripts, you can easily do it writing the name of your python scripts instead of the old one in the `makefile` script. Compilation and executing will be automatically done for C++ scripts and Python scripts.
-
 
 
 ## Files
@@ -55,6 +51,7 @@ If you want to execute your own python scripts, you can easily do it writing the
 All the files C++ and python need to be in the same folder to be executed.
 
 * `BasicRobot.cpp` and `Robot.cpp` -- contains all the C++ code which controls the robot at a lower level than Python code.
+* `shared_memory_specification.txt` -- specifies the structure of the shared memory. This is read both by Python and by C++. You can freely add your own variables but be careful when you remove existing variables since some of the code may depend on them.
 * `create_c_header.py` -- create the C++ header file which contains the structure of the shared memory for the C++ code
 * `sharedmem.py` -- infrastructure for accessing the shared memory
 * `robot.py` -- contains simple functions to control the robot
@@ -76,6 +73,10 @@ To control the robot main loop iteration time (the number of cycles per second) 
 In reality, the robot can only be controlled by a C++ program. But we want to run the experiment with python, that is why we need to use a shared memory. In the `shared_memory_specification.txt` document, we write the parameter that we want to add in the shared memory. `create_c_header.py` creates the C++ header file which contains the structure used by the C++ script to write into the shared memory. The C++ program create a shared memory after having computed the size of this one thanks to the `shared_memory_specification.txt`. From within Python, it is quite easy to access to the shared memory. Actually, to read a parameter, you can use this function `robot.rshm(variable's name)`, and to write in this one, you need to use the function `robot.wshm(variable'name, value)`.
 
 IMPORTANT: In the `shared_memory_specification.txt`, you can only put long int or double because C++ allocates only trunks of 8 bytes. if you put a int which takes 4 bytes and then a double, the double's address is going to be 4 bytes higher. As it is not the case in python, this is a problem because parameters in the shared memory did not have the same address' offset.  
+
+For more information about memory alignment, see e.g. [some Stack overflow discussion](https://stackoverflow.com/questions/5435841/memory-alignment-in-c-structs) and many other pages online.
+
+
 
 ## Programmer's notes
 
