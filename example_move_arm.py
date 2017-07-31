@@ -20,7 +20,7 @@ raw_input("Press the robot force button now and press <ENTER>")
 #    time.sleep(.05)
 
 print("Move starts!")
-robot.move_to(0.02,0.02,0.02,0.5)
+robot.move_to(0.02,0.02,0.02,2.)
 
 while(robot.move_is_done() == False):
     pass
@@ -30,7 +30,7 @@ while(robot.move_is_done() == False):
 
 robot.hold_at()
 robot.return_home()
-raw_input("Press <ENTER> when you wnat to stop the program")
+raw_input("Press <ENTER> when you want to stop the program")
 
 
 
