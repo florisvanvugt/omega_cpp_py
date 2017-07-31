@@ -189,9 +189,11 @@ int main(int argc, char const *argv[]) {
   //printf("y-x %li\n", pA - pB );
   //clock_t t = clock();
 
-  // Set the time of the next loop iteration
-  //clock_t t0 = clock() ;
-  
+  // We are about to enter the main loop. Now let's compute the time
+  // we want to do the next iteration of the loop.
+  clock_t t0 = clock() ;
+  clock_t next_iteration_t = t0 + MAIN_LOOP_TIME_S*CLOCKS_PER_SEC ;
+    
   while (robot.keep_going()) {
 
     // Get the current time (for loop time computation)
@@ -221,29 +223,29 @@ int main(int argc, char const *argv[]) {
     robot.forceToSHM();
     robot.computedPositionToSHM();
     robot.writeLog();
-    //usleep(25000);
 
     // Get the current time
-    //time_t t;
-    //time(&t);
-    clock_t t = clock();
     clock_t t1 = clock();
 
     // Compute how long this loop took
+    sh_memory->loop_time = ((double)(t1-t0))/CLOCKS_PER_SEC;
 
-    //double seconds = difftime(t,t0);
-    sh_memory->loop_time = ((double)(t-t0))/CLOCKS_PER_SEC;
-    if (sh_memory->loop_time > MAIN_LOOP_TIME_S) {
+    // Wait until the scheduled next iteration time
+    while (t1 < next_iteration_t) {
+      t1 = clock();
+    }
+
+    // Compute the time we want to do the NEXT iteration of the loop
+    next_iteration_t += MAIN_LOOP_TIME_S*CLOCKS_PER_SEC;
+    while (next_iteration_t>t1) {
+      // If our current iteration really took too long, we should
+      // drop a frame.
+      next_iteration_t += MAIN_LOOP_TIME_S*CLOCKS_PER_SEC;
       sh_memory->dropped_iterations +=1;
     }
-    //printf("%f\n", MAIN_LOOP_ITERATION_TIME);
-    while ((((double)(t1-t0))/CLOCKS_PER_SEC) < MAIN_LOOP_TIME_S) {
-      t1 = clock();
-      //printf("loop_time : %f\n", sh_memory->loop_time*1000000);
-    }
+    
     sh_memory->iteration_time = ((double)(t1-t0))/CLOCKS_PER_SEC;
 
-    //usleep(MAIN_LOOP_ITERATION_TIME-(sh_memory->loop_time)*1000000);
   }
 
   robot.close_sharedmem();

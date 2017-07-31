@@ -1,7 +1,9 @@
 
 # Omega C++ / Python code
 
-This is a simple interface for the Omega Robot. Here are implemented the Extreme Test and the Perceptual Test. It is implemented in Python 2 but the part which controls the robot is still in C++
+This code is based heavily on code developed by Mathilde Chaplain as part of her internship at the Motor Control Lab. The code is built on the Omega robot drivers which you can download from the manufacturer (`dhd-3.2.2.1466-linux-x86_64.tar.gz`).
+
+This is a simple interface for the Omega Robot. It is implemented in Python 2 but the part which controls the robot is still in C++.
 
 ## Requirements
 
@@ -55,13 +57,8 @@ All the files C++ and python need to be in the same folder to be executed.
 * `create_c_header.py` -- create the C++ header file which contains the structure of the shared memory for the C++ code
 * `sharedmem.py` -- infrastructure for accessing the shared memory
 * `robot.py` -- contains simple functions to control the robot
-* `interface.py` -- executes Extreme or Perceptual Test, main script
 
-in `Old/`, there are some example of basic programs:
 
-* `run_simple.py` -- reads the position of the robot
-* `moveArm.py` -- moves the robot to a point et keep it at this point until the user press <ENTER>
-* `show_trajectory.py` -- captures the robot's trajectory and plots it
 
 
 ## Shared memory
