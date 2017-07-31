@@ -207,14 +207,15 @@ int main(int argc, char const *argv[]) {
     // Update the shared memory
     robot.forceToSHM();
     robot.writeLog();
-    robot.flush_sharedmem();
 
     // Get the current time
     clock_t t1 = clock();
 
     // Compute how long this loop took
     sh_memory->loop_time = ((double)(t1-t_loop_begin))/CLOCKS_PER_SEC;
-
+    sh_memory->clock = (double)t1/CLOCKS_PER_SEC; // update the clock
+    robot.flush_sharedmem(); // Flush shared memory
+    
     // Wait until the scheduled next iteration time
     while (t1 < next_iteration_t) {
       t1 = clock();

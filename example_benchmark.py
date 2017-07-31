@@ -10,13 +10,19 @@ if True:
 
     T = 5. # seconds
     print("Running loop test for %f seconds"%T)
-    t = time.time()
-    it0 = robot.rshm('loop_iterator')
-    while time.time()<t+T:
-        it1 = robot.rshm('loop_iterator')
+    t0 = time.time()
+    it0      = robot.rshm('loop_iterator')
+    robott0  = robot.rshm('clock')
+    t1 = time.time()
+    while t1<t0+T:
+        it1      = robot.rshm('loop_iterator')
+        robott1  = robot.rshm('clock')
+        t1       = time.time()
     print("Passed %i samples i.e. loop time %f ms and %i dropped loops"%(it1-it0,
                                                                          T/(it1-it0)*1000,
                                                                          robot.rshm('dropped_iterations')))
+    print("Python thinks this took %f s, the robot thinks this took %f s"%(t1-t0,robott1-robott0))
+    print("The robot thinks it has a loop time of %f ms"%(1000*(robott1-robott0)/(it1-it0)))
     print("Desired loop time %f ms"%(1000*robot.rshm('main_loop_time')))
 
 
