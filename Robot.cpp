@@ -219,11 +219,12 @@ int main(int argc, char const *argv[]) {
     // Wait until the scheduled next iteration time
     while (t1 < next_iteration_t) {
       t1 = clock();
+      //printf("it=%li t0=%li t1=%li\n",sh_memory->loop_iterator,t1,next_iteration_t);
     }
 
     // Compute the time we want to do the NEXT iteration of the loop
     next_iteration_t += MAIN_LOOP_TIME_S*CLOCKS_PER_SEC;
-    while (next_iteration_t>t1) {
+    while (next_iteration_t<t1) {
       // If our current iteration really took too long, we should
       // drop a frame.
       next_iteration_t += MAIN_LOOP_TIME_S*CLOCKS_PER_SEC;

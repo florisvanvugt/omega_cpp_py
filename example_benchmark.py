@@ -13,8 +13,8 @@ if True:
     it0 = robot.rshm('loop_iterator')
     time.sleep(T)
     it1 = robot.rshm('loop_iterator')
-    print("This took %i samples i.e. loop time %f us and %i dropped loops"%(it1-it0,
-                                                                            T/(it1-it0)*1000000,
+    print("This took %i samples i.e. loop time %f ms and %i dropped loops"%(it1-it0,
+                                                                            T/(it1-it0)*1000,
                                                                             robot.rshm('dropped_iterations')))
 
 

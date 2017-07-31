@@ -15,6 +15,7 @@ Python 2 with the following modules:
 
 These last can be install easily using the command `sudo apt-get install python-<module's name>`
 
+
 ## Usage
 
 The robot C++ scripts (`BasicRobot.cpp` and `Robot.cpp`) are in the principal folder (`omega_cpp_py/`) and need to be compiled. For this, you need to be in this directory and write this command from the prompt:
@@ -47,6 +48,8 @@ robot.unload() #Stop the C++ script
 
 If you want to execute your own python scripts, you can easily do it writing the name of your python scripts instead of the old one in the `makefile` script. Compilation and executing will be automatically done for C++ scripts and Python scripts.
 
+
+
 ## Files
 
 All the files C++ and python need to be in the same folder to be executed.
@@ -55,6 +58,15 @@ All the files C++ and python need to be in the same folder to be executed.
 * `create_c_header.py` -- create the C++ header file which contains the structure of the shared memory for the C++ code
 * `sharedmem.py` -- infrastructure for accessing the shared memory
 * `robot.py` -- contains simple functions to control the robot
+
+
+
+
+## Under the hood
+
+To control the robot main loop iteration time (the number of cycles per second) you can adjust `MAIN_LOOP_TIME_S = .0025;` which is defined in `Robot.h`.
+
+
 
 
 
