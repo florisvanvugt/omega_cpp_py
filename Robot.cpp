@@ -184,7 +184,7 @@ int main(int argc, char const *argv[]) {
   while (robot.keep_going()) {
 
     // Get the current time (for loop time computation)
-    clock_t t0 = clock();
+    clock_t t_loop_begin = clock();
 
     // Keep track of how often we went through this loop
     sh_memory->loop_iterator+=1;
@@ -214,7 +214,7 @@ int main(int argc, char const *argv[]) {
     clock_t t1 = clock();
 
     // Compute how long this loop took
-    sh_memory->loop_time = ((double)(t1-t0))/CLOCKS_PER_SEC;
+    sh_memory->loop_time = ((double)(t1-t_loop_begin))/CLOCKS_PER_SEC;
 
     // Wait until the scheduled next iteration time
     while (t1 < next_iteration_t) {

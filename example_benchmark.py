@@ -8,15 +8,15 @@ robot.init()
 
 if True:
 
-    print("Running loop test...")
-    T = 5. # seconds print("Loop test...")  it0 =
+    T = 5. # seconds
+    print("Running loop test for %f seconds"%T)
+    t = time.time()
     it0 = robot.rshm('loop_iterator')
-    time.sleep(T)
-    it1 = robot.rshm('loop_iterator')
-    print("This took %i samples i.e. loop time %f ms and %i dropped loops"%(it1-it0,
-                                                                            T/(it1-it0)*1000,
-                                                                            robot.rshm('dropped_iterations')))
-
+    while time.time()<t+T:
+        it1 = robot.rshm('loop_iterator')
+    print("Passed %i samples i.e. loop time %f ms and %i dropped loops"%(it1-it0,
+                                                                         T/(it1-it0)*1000,
+                                                                         robot.rshm('dropped_iterations')))
 
 
 
