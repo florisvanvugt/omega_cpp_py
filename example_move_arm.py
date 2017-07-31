@@ -29,7 +29,10 @@ while(robot.move_is_done() == False):
 #    time.sleep(.05)
 
 robot.hold_at()
+robot.return_home()
 raw_input("Press <ENTER> when you wnat to stop the program")
+
+
 
 
 

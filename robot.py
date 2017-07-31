@@ -26,6 +26,16 @@ def load():
     pass
 
 
+def return_home():
+    """ Return to a home position, so that when we release the robot
+    it doesn't fall too far. """
+    print("Returning robot handle to home position...")
+    move_to(.07,.005,.006,3.)
+    while not move_is_done():
+        pass
+    print("... returned home.")
+
+
 def unload():
     """ Terminates the robot process. """
     # Ideally tell the robot process to terminate itself
