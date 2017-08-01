@@ -65,6 +65,7 @@ Core files:
 * `robot.py` -- contains simple functions to control the robot
 
 * `lib/libdhd.a` -- contains the proprietary robot code (pre-compiled)
+* `include/libdhd.h` -- idem, header file
 
 Further, various examples are provided in the form of scripts we call `example_<something>.py`. Take a look at these for inspiration. You can always remove these files since they are not part of the core.
 
@@ -80,6 +81,10 @@ To control the robot main loop iteration time (the number of cycles per second) 
 
 Quite simple, call `robot.start_capture()` and some time later, `robot.stop_capture()`, the latter function will return a list of captured positions, coded as a tuple `(x,y,z)`.
 
+
+### Writing your own controller
+
+Quite easy: you need to write a custom controller function that sets the forces `fx, fy, fz` and call this function from the `Robot::mainLoop()` function defined in `Robot.cpp`. To activate the controller from within Python, call `robot.controller(N)` where `N` is the number you assigned to your controller.
 
 
 
@@ -121,6 +126,10 @@ For more information about memory alignment, see e.g. [some Stack overflow discu
 * **Gravity compensation** 
 
 * **Add velocity to PD controller**
+
+* **Benchmark testing** of desired trajectory and actually produced trajectory.
+
+* **Mock Inmotion** with some adjustments, we could pretend this is a planar robot and use it to test Inmotion2 code.
 
 
 
