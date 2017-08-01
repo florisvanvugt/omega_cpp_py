@@ -16,7 +16,7 @@ These last can be install easily using the command `sudo apt-get install python-
 
 We have been running this on a 64-bit version of Xunbuntu 16.04.02, running kernel `4.4.0-87-generic`.
 
-To run the robot you also need to install libusb and possibly some headers.
+To run the robot you also need to install libusb1, under Ubuntu this can be achieved through `sudo apt install libusb-1.0-0-de`.
 
 
 
@@ -65,6 +65,8 @@ Core files:
 * `lib/libdhd.a` -- contains the proprietary robot code (pre-compiled)
 
 Further, various examples are provided in the form of scripts we call `example_<something>.py`. Take a look at these for inspiration. You can always remove these files since they are not part of the core.
+
+
 
 
 ## Under the hood
