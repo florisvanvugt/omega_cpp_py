@@ -2,6 +2,9 @@
 #include <time.h>
 #include <sys/time.h>
 #include <math.h>       /* pow */
+#include <memory.h>
+#include <pthread.h>
+
 
 Robot::Robot()
 {
@@ -228,15 +231,19 @@ double Robot::get_wall_time(){
 }
 
 
-int main(int argc, char const *argv[]) {
 
+
+
+
+void launch() {
+  
   Robot robot;
-
+  
   // Initialise the shared memory
   robot.open_sharedmem();
   shm_t * sh_memory = robot.getShm();
   sh_memory->controller = 0;
-  sh_memory->loop_time = 0;
+  sh_memory->loop_time  = 0;
   // Update the main loop time if so instructed in the shared memory
   sh_memory->main_loop_time = MAIN_LOOP_TIME_S;
   sh_memory->clocks_per_sec = CLOCKS_PER_SEC;
@@ -244,11 +251,32 @@ int main(int argc, char const *argv[]) {
   // Launch the robot
   robot.openDevice();
 
+  // Launch the main loop
   robot.mainLoop();
 
   robot.close_sharedmem();
   robot.closeDevice();
-  return 0;
-  
 }
+
+
+
+
+
+
+int main(int argc, char const *argv[]) {
+
+  /*
+  pthread_t          handle;
+  pthread_create (&handle, NULL, launch, NULL);
+  struct sched_param sp;
+  memset (&sp, 0, sizeof(struct sched_param));
+  sp.sched_priority = 10;
+  pthread_setschedparam (handle, SCHED_RR, &sp);
+  */
+  launch();
+  
+  return 0;
+}
+
+
 

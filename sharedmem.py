@@ -2,6 +2,8 @@ import os
 import mmap
 import struct
 
+
+
 def init_specifications():
     """Read the shared_memory_specification.txt file and parse it """
     f = open("shared_memory_specification.txt", "r")
@@ -45,7 +47,7 @@ def find_variable(var):
         print("ERROR: unknown variable %s"%var)
         exit()
     return specifications[var]
-    #return((specifications[var])[1])
+
 
 
 def rshm(var):
@@ -59,7 +61,6 @@ def rshm(var):
     # Interpret the raw binary as the correct data type
     if (len(tp) == 1):
         interpr, = struct.unpack(tp,memchunk)
-
     else:
         interpr = struct.unpack(tp,memchunk)
     return interpr
@@ -72,3 +73,4 @@ def wshm(var,val):
     with the given variable var."""
     tp,offset,size = find_variable(var)
     shm[(offset):(offset+size)] = struct.pack(tp,val)
+    shm.flush() #offset,size) # flush to ensure changes are written

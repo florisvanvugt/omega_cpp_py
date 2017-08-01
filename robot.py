@@ -57,10 +57,7 @@ def safe_unload():
 def move_is_done():
     """ Tells us whether a movement that we started is completed."""
     return rshm('move_done')==1
-    #    wshm('flag',0)
-    #    return True
-    #else:
-    #return False
+
 
 
 def move_to(x,y,z,t):

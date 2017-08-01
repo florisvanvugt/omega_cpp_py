@@ -100,7 +100,16 @@ void BasicRobot::openDevice() {
       printf ("Error: Cannot open device (%s)\n", dhdErrorGetLastStr());
       sh_memory->quit = 1;
   }
+  
   // identify device
+  printf ("%s device detected\n\n", dhdGetSystemName());
+  
+  // set gravity compensation
+  dhdSetGravityCompensation(DHD_ON);
+
+  // release brakes!
+  dhdSetBrakes(DHD_OFF);
+  
 }
 
 //Get the position of the robot et put it in the shared memory
@@ -116,12 +125,13 @@ void BasicRobot::getPosition(){
    sh_memory->z = z;
 
    if (sh_memory->record_flag == 1) {
+     // Test whether we have still space in our buffer, if not, do not record anything
      if (sh_memory->record_iterator<(sizeof(sh_memory->record_x)/sizeof(sh_memory->record_x[0]))) {
-     (sh_memory->record_x)[sh_memory->record_iterator] = x;
-     (sh_memory->record_y)[sh_memory->record_iterator] = y;
-     (sh_memory->record_z)[sh_memory->record_iterator] = z;
-     sh_memory->record_iterator = sh_memory->record_iterator+1;
-   }
+       (sh_memory->record_x)[sh_memory->record_iterator] = x;
+       (sh_memory->record_y)[sh_memory->record_iterator] = y;
+       (sh_memory->record_z)[sh_memory->record_iterator] = z;
+       sh_memory->record_iterator = sh_memory->record_iterator+1;
+     }
    }
 }
 
