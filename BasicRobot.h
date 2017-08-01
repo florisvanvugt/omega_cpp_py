@@ -33,9 +33,8 @@ class BasicRobot
         bool keep_going();
         shm_t *getShm();
     protected:
-    private:
-      //Attributs : Shared Memory
       shm_t *sh_memory;
+    private:
 
 };
 

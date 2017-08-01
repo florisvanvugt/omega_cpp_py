@@ -2,14 +2,14 @@
 #define ROBOT_H
 
 
-#include "include/CVector3d.h"
-#include "include/CMaths.h"
+//#include "include/CVector3d.h"
+//#include "include/CMaths.h"
 #include "BasicRobot.h"
 
 
 // Constants that are used for force control
-#define khi 10
-const cVector3d k (1000,1000,1000);
+//#define khi 10
+//const cVector3d k (1000,1000,1000);
 
 
 // The duration of the main loop iteration
@@ -22,7 +22,8 @@ class Robot : public BasicRobot
         Robot();
         virtual ~Robot();
 
-        void computeInteractions (double t);
+	void mainLoop();
+        void compute_minjerk_target (double t);
         void setForce();
         void ControllerNull();
         void ControllerMoveToPoint();
@@ -31,14 +32,14 @@ class Robot : public BasicRobot
         void ControllerHoldAtPoint();
 
     protected:
+	double fx;
+	double fy;
+	double fz;
+	
     private:
-        cVector3d computedPos;
-        cVector3d computedVel;
-        cVector3d computedForce;
-
-        void computePos (double t);
-        void computeVel (double t);
-        void computeInteractions ();
+        void compute_pd_forces ();
+	double get_wall_time();
+        //void computeVel (double t);
 };
 
 #endif // ROBOT_H

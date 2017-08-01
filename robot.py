@@ -5,6 +5,9 @@ import time
 
 
 
+# Stiffness to use for the movement controller
+STIFFNESS = 1000
+
 
 def init():
     """ Initialises the robot and the shared memory """
@@ -65,21 +68,21 @@ def move_to(x,y,z,t):
     Note that the function returns immediately, even when the movement
     is still ongoing. """
 
+    wshm('controller',0) # do not do anything while we set this up
+    wshm('stiffness',STIFFNESS)
     wshm('target_x',x)
     wshm('target_y',y)
     wshm('target_z',z)
-
     wshm('movement_duration',t)
 
     sx,sy,sz=rshm('x'),rshm('y'),rshm('z')
-
     wshm('start_x',sx)
     wshm('start_y',sy)
     wshm('start_z',sz)
 
     wshm('move_done',0)
     wshm('movet',0)
-    wshm('controller',1)
+    wshm('controller',1) # switch on the controller
 
 
     
@@ -94,9 +97,10 @@ def hold_at(x=None,y=None,z=None):
     You have to make sure the robot handle is really at (x,y,z) before calling this, otherwise
     it will snap to that location.
     """
-    if x==None: x = robot.rshm('x')
-    if y==None: y = robot.rshm('y')
-    if z==None: z = robot.rshm('z')
+    if x==None: x = rshm('x')
+    if y==None: y = rshm('y')
+    if z==None: z = rshm('z')
+    wshm('stiffness',STIFFNESS)
     wshm('target_x',x)
     wshm('target_y',y)
     wshm('target_z',z)
@@ -113,7 +117,7 @@ def stay():
     
 def stay_at(x,y,z):
     """Hold the robot at position (x,y,z)."""
-    hold_at(xa,y,z)
+    hold_at(x,y,z)
     
 
     

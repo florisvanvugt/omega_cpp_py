@@ -24,9 +24,10 @@ start_z d
 target_x d
 target_y d
 target_z d
-minjerk_x d
-minjerk_y d
-minjerk_z d
+stiffness d
+desired_x d
+desired_y d
+desired_z d
 mds d
 loop_time d
 iteration_time d

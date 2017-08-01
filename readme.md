@@ -110,8 +110,6 @@ For more information about memory alignment, see e.g. [some Stack overflow discu
 
 ## Issues / TODO
 
-* **Clock timing** There seems to be an issue where the C++ code and Python disagree about how long things take. See `example_benchmark.py`.
-
 * **Logging to a specified file** Currently we log to `log.csv` always.
 
 * **Providing a debug log** in case something goes wrong.

@@ -4,8 +4,6 @@ import time
 
 robot.launch()
 robot.init()
-robot.load()
-
 
 i = 0
 while((i<50) and (robot.rshm('quit') != 1)):
