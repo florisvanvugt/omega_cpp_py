@@ -120,10 +120,6 @@ For more information about memory alignment, see e.g. [some Stack overflow discu
 
 * **Add velocity to PD controller**
 
-* **Remove link to proprietary C code** for matrices and vectors etc.
-
-* **Figure out which USB lib we need**
-
 
 
 ## Programmer's notes
