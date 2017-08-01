@@ -22,6 +22,8 @@ To run the robot you also need to install libusb1, under Ubuntu this can be achi
 
 ## Usage
 
+Turn on the Omega robot using the switch in the back. One of the two front LEDs will blink. Press the `RESET` button on the robot controller box. Now you should be good to go.
+
 The robot C++ scripts (`BasicRobot.cpp` and `Robot.cpp`) are in the principal folder (`omega_cpp_py/`) and need to be compiled. For this, you need to be in this directory and write this command from the prompt:
 
 ```
