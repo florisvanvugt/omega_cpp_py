@@ -31,9 +31,8 @@ You can create your own python script to control the robot using the simple func
 import robot
 import time
 
-robot.launch()
-robot.init()
-robot.load()
+robot.launch() # launches the robot C++ script
+robot.init()   # initialises shared memory
 
 robot.move_to(0.01,0.02,0,2) # move to point (x=0.01,y=0.02,z=0.) in t=2 seconds.
 while (robot.move_is_done() == False):
@@ -94,6 +93,25 @@ which creates a list of 4000 doubles, for example to hold a trajectory in shared
 IMPORTANT: In the `shared_memory_specification.txt`, you can only put long int or double because C++ allocates only trunks of 8 bytes. if you put a int which takes 4 bytes and then a double, the double's address is going to be 4 bytes higher. As it is not the case in python, this is a problem because parameters in the shared memory did not have the same address' offset.  
 
 For more information about memory alignment, see e.g. [some Stack overflow discussion](https://stackoverflow.com/questions/5435841/memory-alignment-in-c-structs) and many other pages online.
+
+
+
+
+## Issues / TODO
+
+* **Clock timing** There seems to be an issue where the C++ code and Python disagree about how long things take. See `example_benchmark.py`.
+
+* **Logging to a specified file** Currently we log to `log.csv` always.
+
+* **Providing a debug log** in case something goes wrong.
+
+* **Allow comments in shared memory specification**
+
+* **Gravity compensation** 
+
+* **Add velocity to PD controller**
+
+* **Remove link to proprietary C code** for matrices and vectors etc.
 
 
 
