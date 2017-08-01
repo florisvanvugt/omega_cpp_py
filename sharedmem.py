@@ -30,22 +30,6 @@ def get_specifications():
     return specifications
 
 
-def compute_address(offset, typevar): # DEPRECATED
-    if (typevar == 'i'):
-        return (offset + 4)
-    elif (typevar == 'd'):
-        return (offset + 8)
-    elif (len(typevar)>1):
-        type_tab, size_tab = typevar.strip(']').split('[')
-        if (type_tab == 'i'):
-            return (offset + 4*int(size_tab))
-        elif (type_tab == 'd'):
-            return (offset + 8*int(size_tab))
-        #print("Type of the the variable is not good.")
-        return 0
-
-
-
 
 #Open the shared memory
 def init_shared_memory():
@@ -68,8 +52,6 @@ def rshm(var):
     """ Reads the shared memory value associated with the given variable,
     for example rshm('x') """
     tp,offset,size = find_variable(var)
-    #typevar = (specifications[var])[0]
-    #sizevar = compute_address(0, typevar)
 
     # Extract the memory chunk associated with this variable (still needs to be decoded)
     memchunk = shm[offset:(offset+size)]
@@ -82,11 +64,6 @@ def rshm(var):
         interpr = struct.unpack(tp,memchunk)
     return interpr
 
-    #if (len(typevar)>1):
-    #        type_tab, size_tab = typevar.strip(']').split('[')
-    #        return ((struct.unpack(str(size_tab)+type_tab, shm[offset:(offset+sizevar)])))
-    #    else:
-    #        return ((struct.unpack(typevar[0], shm[offset:(offset+sizevar)]))[0])
 
 
 
@@ -94,6 +71,4 @@ def wshm(var,val):
     """ Writes the given value to the shared memory address associated
     with the given variable var."""
     tp,offset,size = find_variable(var)
-    #typevar = (specifications[var])[0]
-    #sizevar = compute_address(0, typevar)
     shm[(offset):(offset+size)] = struct.pack(tp,val)
