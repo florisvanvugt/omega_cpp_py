@@ -5,8 +5,11 @@ clean:
 	rm -f BasicRobot
 	rm -f Robot
 
-kill:
+quit:
 	python -c "import robot; robot.init(); robot.wshm('quit',1)"
+
+kill:
+	sudo pkill Robot
 
 struct_shm.h: create_c_header.py shared_memory_specification.txt
 	python create_c_header.py     # creates struct_shm.h

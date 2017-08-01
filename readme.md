@@ -132,7 +132,7 @@ For more information about memory alignment, see e.g. [some Stack overflow discu
 
 Sometimes, when the program is not well-closed, the Robot C++ process can stay opened. In this case, if you execute again the program, it will not be able to open the device.
 
-In this case you can try and run `make kill` which will send the robot the instruction to quit through the shared memory.
+In this case you can try and run `make quit` which will send the robot the instruction to quit through the shared memory. If this does not work, you can run `make kill` which will attempt to kill the robot process (the hard way).
 
 If for some reason the robot is no longer listening to the shared memory, you need to kill the Robot process manually from the prompt.
 For that, you have to invoke the command `ps -Al`, looking for the robot process' ID and then, you need to do `sudo kill <ID>`.  

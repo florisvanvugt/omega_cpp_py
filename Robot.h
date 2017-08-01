@@ -13,7 +13,7 @@ const cVector3d k (1000,1000,1000);
 
 
 // The duration of the main loop iteration
-double MAIN_LOOP_TIME_S = .0025; //seconds
+double MAIN_LOOP_TIME_S = .005; //seconds
 
 
 class Robot : public BasicRobot

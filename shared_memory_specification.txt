@@ -1,6 +1,7 @@
 loop_iteration_time d
 loop_iterator q
 clock d
+clocks_per_sec d
 x d
 y d
 z d

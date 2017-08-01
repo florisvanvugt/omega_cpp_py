@@ -1,4 +1,7 @@
 #include "Robot.h"
+#include <time.h>
+#include <sys/time.h>
+
 
 Robot::Robot()
 {
@@ -153,7 +156,16 @@ void Robot::writeLog(){
 }
 
 
-
+double get_wall_time(){
+  /* Return the current system time ('wall time') in seconds */
+  // courtesy https://stackoverflow.com/questions/17432502/how-can-i-measure-cpu-time-and-wall-clock-time-on-both-linux-windows
+  struct timeval time;
+  if (gettimeofday(&time,NULL)){
+    //  Handle error
+    return 0;
+  }
+  return (double)time.tv_sec + (double)time.tv_usec * .000001;
+}
 
 
 int main(int argc, char const *argv[]) {
@@ -167,14 +179,16 @@ int main(int argc, char const *argv[]) {
   sh_memory->loop_time = 0;
   // Update the main loop time if so instructed in the shared memory
   sh_memory->main_loop_time = MAIN_LOOP_TIME_S;
+  sh_memory->clocks_per_sec = CLOCKS_PER_SEC;
 
   // Launch the robot
   robot.openDevice();
   
   // We are about to enter the main loop. Now let's compute the time
   // we want to do the next iteration of the loop.
-  clock_t t0 = clock() ;
-  clock_t next_iteration_t = t0 + (MAIN_LOOP_TIME_S*CLOCKS_PER_SEC) ;
+  double t0 = get_wall_time();
+  //clock_t t0 = clock() ;
+  double next_iteration_t = t0 + MAIN_LOOP_TIME_S;
     
   while (robot.keep_going()) {
 
@@ -182,7 +196,7 @@ int main(int argc, char const *argv[]) {
     MAIN_LOOP_TIME_S = (sh_memory->main_loop_time);
     
     // Get the current time (for loop time computation)
-    clock_t t_loop_begin = clock();
+    double t_loop_begin = get_wall_time();
 
     // Keep track of how often we went through this loop
     sh_memory->loop_iterator+=1;
@@ -209,29 +223,28 @@ int main(int argc, char const *argv[]) {
     robot.writeLog();
 
     // Get the current time
-    clock_t t1 = clock();
+    double t1 = get_wall_time();
 
     // Compute how long this loop took
-    sh_memory->loop_time = ((double)(t1-t_loop_begin))/CLOCKS_PER_SEC;
-    sh_memory->clock = (double)t1/CLOCKS_PER_SEC; // update the clock
+    sh_memory->loop_time = t1-t_loop_begin;
+    sh_memory->clock = t1; // update the clock
     robot.flush_sharedmem(); // Flush shared memory
     
     // Wait until the scheduled next iteration time
     while (t1 < next_iteration_t) {
-      t1 = clock();
-      //printf("it=%li t0=%li t1=%li\n",sh_memory->loop_iterator,t1,next_iteration_t);
+      t1 = get_wall_time();
     }
 
     // Compute the time we want to do the NEXT iteration of the loop
-    next_iteration_t += MAIN_LOOP_TIME_S*CLOCKS_PER_SEC;
+    next_iteration_t += MAIN_LOOP_TIME_S;
     while (next_iteration_t<t1) {
       // If our current iteration really took too long, we should
       // drop a frame.
-      next_iteration_t += MAIN_LOOP_TIME_S*CLOCKS_PER_SEC;
+      next_iteration_t += MAIN_LOOP_TIME_S;
       sh_memory->dropped_iterations +=1;
     }
     
-    sh_memory->iteration_time = ((double)(t1-t0))/CLOCKS_PER_SEC;
+    sh_memory->iteration_time = t1-t0; // Compute how long the whole iteration took, approximately
 
   }
 
