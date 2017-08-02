@@ -1,3 +1,4 @@
+active q
 loop_iteration_time d
 loop_iterator q
 clock d
@@ -24,10 +25,13 @@ target_x d
 target_y d
 target_z d
 stiffness d
+damping d
 desired_x d
 desired_y d
 desired_z d
-mds d
+desired_vel_x d
+desired_vel_y d
+desired_vel_z d
 loop_time d
 iteration_time d
 dropped_iterations q
@@ -35,5 +39,6 @@ movement_duration d
 main_loop_time d
 t d
 controller q
-movet q
+move_iterator q
+write_log q
 quit q

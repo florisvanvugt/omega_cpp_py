@@ -6,7 +6,8 @@ import time
 
 
 # Stiffness to use for the movement controller
-STIFFNESS = 1000
+STIFFNESS = 2000
+DAMPING = 20
 
 
 def init():
@@ -14,6 +15,10 @@ def init():
     init_specifications()
     init_shared_memory()
     wshm('controller',0)
+    print("Waiting for robot to become active...")
+    while rshm('active')!=1:
+        pass
+    print("ready.")
 
 
 def launch():
@@ -67,6 +72,7 @@ def move_to(x,y,z,t):
 
     wshm('controller',0) # do not do anything while we set this up
     wshm('stiffness',STIFFNESS)
+    wshm('damping',DAMPING)
     wshm('target_x',x)
     wshm('target_y',y)
     wshm('target_z',z)
@@ -78,7 +84,7 @@ def move_to(x,y,z,t):
     wshm('start_z',sz)
 
     wshm('move_done',0)
-    wshm('movet',0)
+    wshm('move_iterator',0)
     wshm('controller',1) # switch on the controller
 
 
@@ -98,6 +104,7 @@ def hold_at(x=None,y=None,z=None):
     if y==None: y = rshm('y')
     if z==None: z = rshm('z')
     wshm('stiffness',STIFFNESS)
+    wshm('damping',DAMPING)
     wshm('target_x',x)
     wshm('target_y',y)
     wshm('target_z',z)

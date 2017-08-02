@@ -15,7 +15,7 @@ class Robot : public BasicRobot
   virtual ~Robot();
   
   void mainLoop();
-  void compute_minjerk_target (double t);
+  void compute_minjerk_target (double movt,double movdur);
   void setForce();
   void zeroForce();
   
@@ -34,6 +34,7 @@ class Robot : public BasicRobot
   
  private:
   void compute_pd_forces ();
+  void compute_p_forces ();
   double get_wall_time();
   //void computeVel (double t);
 };

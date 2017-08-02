@@ -10,7 +10,7 @@ robot.init()
 vs   = ["x","y","z","fx","fy","fz",
         "start_x","start_y","start_z","target_x","target_y","target_z",
         "desired_x","desired_y","desired_z","stiffness",
-        "controller","movet","t","mds","movement_duration","move_done", "main_loop_time"]
+        "controller","move_iterator","t","movement_duration","move_done", "main_loop_time"]
 print(" ".join(vs))
 
 for _ in range(20):

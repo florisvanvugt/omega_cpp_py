@@ -27,7 +27,12 @@ bool BasicRobot::keep_going() {
 //Prepare the shared memory
 void BasicRobot::open_sharedmem() {
   int fd;
-
+  
+  if (SHM_FILESIZE!=sizeof(shm_t)) {
+    printDebug("Error: the shared memory is not the correct size. Expected size %i vs actual size %i. This could be due to memory padding.",SHM_FILESIZE,sizeof(sh_memory));
+    exit(EXIT_FAILURE);
+  }
+  
   //if (exists(fd))
   if( remove( SHM_FILEPATH ) != 0 )
     printDebug( "Error deleting shared memory file. Maybe it didn't exist, in which case it's okay" );
@@ -60,15 +65,15 @@ void BasicRobot::open_sharedmem() {
   
   //Allocate the memory for the shared memory
   sh_memory = (shm_t *)mmap(0, SHM_FILESIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-  
+
   //Verify if the allocation worked
   if (sh_memory == MAP_FAILED) {
     close(fd);
     printDebug("Error mmapping the file");
     exit(EXIT_FAILURE);
   }
-  
-  //sh_memory->x = 0;
+
+
 }
 
 
@@ -103,18 +108,22 @@ void BasicRobot::openDevice() {
   // open the first available device
   if (dhdOpen () < 0) {
       printDebug ("Error: Cannot open device (%s)\n", dhdErrorGetLastStr());
-      printf ("Error: Cannot open device (%s)\n", dhdErrorGetLastStr());
+      printf ("Error: Cannot open device (%s) -- this can be because another robot process is active, if so, try killing it\n", dhdErrorGetLastStr());
       sh_memory->quit = 1;
   }
   
   // identify device
   printDebug ("'%s' device detected", dhdGetSystemName());
-  
+
+  // set velocity estimation mode
+  //dhdConfigLinearVelocity(20,DHD_VELOCITY_WINDOWING,-1);
+    
   // set gravity compensation
   dhdSetGravityCompensation(DHD_ON);
 
   // release brakes!
   dhdSetBrakes(DHD_OFF);
+
   
 }
 

@@ -20,29 +20,48 @@ Robot::~Robot()
 }
 
 
+
+
 /* 
    Compute the target position corresponding to the current time
    for a minimum-jerk trajectory.
- */
-void Robot::compute_minjerk_target (double t){
-  //cVector3d depth;
-  //cVector3d result;
+
+   Arguments
+   movt : the current time in the movement (t=0 is move start)
+   movdur : the desired duration of the current movement
+*/
+void Robot::compute_minjerk_target (double movt,double movdur){
   shm_t *shm = getShm();
-  //    double T = sh_memory->movement_duration;
-  double position_prop = 10*pow(t,3)-15*pow(t,4)+6*pow(t,5); // minimum jerk position
-  shm->desired_x = (shm->start_x) + (shm->target_x - shm->start_x)*position_prop;
-  shm->desired_y = (shm->start_y) + (shm->target_y - shm->start_y)*position_prop;
-  shm->desired_z = (shm->start_z) + (shm->target_z - shm->start_z)*position_prop;
+
+  /*
+    source for minimum jerk computation:
+    Flash, Tamar, and Neville Hogan. "The coordination of arm
+    movements: an experimentally confirmed mathematical model." The
+    journal of Neuroscience 5, no. 7 (1985): 1688-1703.
+   */
+  double tau = movt/movdur; // the proportion of the movement completed
+  double position = 10*pow(tau,3)-15*pow(tau,4)+6*pow(tau,5); // minimum jerk position
+  shm->desired_x = (shm->start_x) + (shm->target_x - shm->start_x)*position;
+  shm->desired_y = (shm->start_y) + (shm->target_y - shm->start_y)*position;
+  shm->desired_z = (shm->start_z) + (shm->target_z - shm->start_z)*position;
+
+  // Compute the desired velocity
+  double velocity = -30*pow(movt,4)/pow(movdur,5) + 60*pow(movt,3)/pow(movdur,4) - 30*pow(movt,2)/pow(movdur,3);
+  shm->desired_vel_x = (shm->start_x - shm->target_x)*velocity;
+  shm->desired_vel_y = (shm->start_y - shm->target_y)*velocity;
+  shm->desired_vel_z = (shm->start_z - shm->target_z)*velocity;
+  
 }
 
 
 
 
-/* Compute forces as defined by a PD controller.
+/* 
+   Compute forces as defined by a P controller (position-only)
    This reads the current position from shared memory
    and compares it against the target position (shm->target_{x,y,z})
 */
-void Robot::compute_pd_forces ()
+void Robot::compute_p_forces ()
 {
   shm_t * shm = getShm();
   double stiffness = shm->stiffness;
@@ -52,9 +71,30 @@ void Robot::compute_pd_forces ()
   fy = -stiffness*(shm->y - shm->desired_y);
   fz = -stiffness*(shm->z - shm->desired_z);
   
-  //velocity  = cMul(-khi, velocity);
-  //localForce.addr(localVel, localForce);
 }
+
+
+
+
+/* 
+   Compute forces as defined by a PD controller (position-and-derivative).
+   This reads the current position from shared memory
+   and compares it against the target position (shm->target_{x,y,z})
+*/
+void Robot::compute_pd_forces ()
+{
+  shm_t * shm = getShm();
+  double stiffness = shm->stiffness;
+  double damping   = shm->damping;
+
+  // compute reaction force
+  fx = -stiffness*(shm->x - shm->desired_x) - damping*(shm->vel_x - shm->desired_vel_x);
+  fy = -stiffness*(shm->y - shm->desired_y) - damping*(shm->vel_y - shm->desired_vel_y);
+  fz = -stiffness*(shm->z - shm->desired_z) - damping*(shm->vel_z - shm->desired_vel_z);
+  
+}
+
+
 
 
 
@@ -93,10 +133,10 @@ void Robot::ControllerNull() {
 void Robot::ControllerMoveToPoint() {
   shm_t * sh_memory = getShm();
 
-  //double T = sh_memory->movement_duration;
-  (sh_memory->mds)=(sh_memory->movement_duration)/MAIN_LOOP_TIME_S;
+  double movt   = sh_memory->move_iterator*MAIN_LOOP_TIME_S; // how long we have been moving
+  double movdur = sh_memory->movement_duration;      // how long this move should take
 
-  if ((sh_memory->movet) >= sh_memory->mds) {
+  if (movt >= movdur) {
     // If the movement is completed, switch back to the null controller...
     sh_memory->controller = 0;
     sh_memory->move_done = 1;
@@ -104,18 +144,10 @@ void Robot::ControllerMoveToPoint() {
 
   else {
     // Compute where I should be at the current time
-
-    // So what we want, is a variable t that tells us where
-    // we are in the movement, from 0 = beginning of movement
-    // to 1 = end of movement.
-    // However, move_t tells us which sample we are from the total
-    // movement duration (for example 500 our of 1000)
-    double movt = ((double)sh_memory->movet)/(sh_memory->mds);
-
-    compute_minjerk_target(movt);
+    compute_minjerk_target(movt,movdur);
     compute_pd_forces();
     
-    (sh_memory->movet)++;
+    (sh_memory->move_iterator)++;
   }
 }
 
@@ -127,15 +159,25 @@ void Robot::ControllerHoldAtPoint() {
   sh_memory->desired_x = sh_memory->target_x;
   sh_memory->desired_y = sh_memory->target_y;
   sh_memory->desired_z = sh_memory->target_z;
+  sh_memory->desired_vel_x = 0;
+  sh_memory->desired_vel_y = 0;
+  sh_memory->desired_vel_z = 0;
   compute_pd_forces();
 }
 
 
 
+
+
 void Robot::writeLog(){
-  FILE* fp = fopen("log.csv","a");
-  fprintf(fp, "%f %f %f %f %f %f %li %li\n",sh_memory->x, sh_memory->y, sh_memory->z, fx, fy, fz, sh_memory->controller, sh_memory->quit);
-  fclose(fp);
+  // Not so sure if I really want to use this very much.
+  // After all, we can record trajectories and have them within Python
+  // instantly using start_capture(), stop_capture().
+  if (sh_memory->write_log) {
+    FILE* fp = fopen("log.csv","a");
+    fprintf(fp, "%f %f %f %f %f %f %li %li\n",sh_memory->x, sh_memory->y, sh_memory->z, fx, fy, fz, sh_memory->controller, sh_memory->quit);
+    fclose(fp);
+  }
 }
 
 
@@ -146,6 +188,7 @@ void Robot::writeLog(){
 void Robot::mainLoop() {
 
   printDebug("Entering main loop");
+  sh_memory->active = 1;
   
   // We are about to enter the main loop. Now let's compute the time
   // we want to do the next iteration of the loop.
@@ -216,6 +259,7 @@ void Robot::mainLoop() {
     sh_memory->iteration_time = t1-t_loop_begin; // Compute how long the whole iteration took, approximately
 
   }
+  sh_memory->active = 0;
   printDebug ("Ending main loop");
 
 }
@@ -257,9 +301,7 @@ double Robot::get_wall_time(){
 
 void launch() {
   
-  //Robot robot;
-
-  signal(SIGINT,sigint_handler); // set the Control+C handler
+  signal(SIGINT,sigint_handler); // install a Control+C handler
   
   // Start the debug log
   robot.openDebug();
@@ -268,8 +310,11 @@ void launch() {
   // Initialise the shared memory
   robot.printDebug("Opening shared memory");
   robot.open_sharedmem();
+  // Set some default values
   shm_t * sh_memory = robot.getShm();
+  sh_memory->active     = 0; // setting up
   sh_memory->controller = 0;
+  sh_memory->write_log  = 0;
   sh_memory->loop_time  = 0;
   // Update the main loop time if so instructed in the shared memory
   sh_memory->main_loop_time = MAIN_LOOP_TIME_S;
