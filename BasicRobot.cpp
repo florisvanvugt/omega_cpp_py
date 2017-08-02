@@ -1,13 +1,14 @@
 #include "BasicRobot.h"
+#include <fstream> 
+#include <cstdarg>
 
 BasicRobot::BasicRobot()
 {
-    //ctor
 }
+
 
 BasicRobot::~BasicRobot()
 {
-    //dtor
 }
 
 
@@ -15,7 +16,11 @@ BasicRobot::~BasicRobot()
 bool BasicRobot::keep_going() {
   // Tell us whether the robot needs to quit
   //return true;
-  return (sh_memory)->quit==0;
+  if (sh_memory->quit==1) {
+    printDebug ("Quit signal received");
+    return 0;
+  }
+  return 1;
 }
 
 
@@ -97,12 +102,13 @@ shm_t *BasicRobot::getShm(){
 void BasicRobot::openDevice() {
   // open the first available device
   if (dhdOpen () < 0) {
+      printDebug ("Error: Cannot open device (%s)\n", dhdErrorGetLastStr());
       printf ("Error: Cannot open device (%s)\n", dhdErrorGetLastStr());
       sh_memory->quit = 1;
   }
   
   // identify device
-  printf ("%s device detected\n\n", dhdGetSystemName());
+  printDebug ("%s device detected", dhdGetSystemName());
   
   // set gravity compensation
   dhdSetGravityCompensation(DHD_ON);
@@ -126,7 +132,7 @@ void BasicRobot::getPosition(){
 
    if (sh_memory->record_flag == 1) {
      // Test whether we have still space in our buffer, if not, do not record anything
-     if (sh_memory->record_iterator<(sizeof(sh_memory->record_x)/sizeof(sh_memory->record_x[0]))) {
+     if (sh_memory->record_iterator<(unsigned)(sizeof(sh_memory->record_x)/sizeof(sh_memory->record_x[0]))) {
        (sh_memory->record_x)[sh_memory->record_iterator] = x;
        (sh_memory->record_y)[sh_memory->record_iterator] = y;
        (sh_memory->record_z)[sh_memory->record_iterator] = z;
@@ -149,4 +155,61 @@ void BasicRobot::getVelocity(){
 //Close the device
 void BasicRobot::closeDevice() {
   dhdClose();
+}
+
+
+
+
+
+//Debug log functionality
+
+// Formatted printing to an output stream
+char* printformat(string fmt, size_t size, ...)
+{
+  const char* formt = fmt.c_str();
+  static char buffer[500] = ""; // note the maximum length of the format
+  va_list argptr;
+  va_start(argptr,size); // formt
+  vsprintf(buffer,formt, argptr);
+  va_end(argptr);
+  return buffer;
+}
+
+
+// Open the debug log file
+void BasicRobot::openDebug() {
+  debugfp = fopen ("robot_debug.txt","a");
+  fprintf(debugfp,"\n\n");
+}
+
+
+
+
+
+// Print a line to the debug file
+void BasicRobot::printDebug(const char *fmt, ...) {
+  //debugfp << msg;
+
+  fprintf(debugfp,"[Robot %i] ",::getpid());
+  time_t timer; struct tm* tm_info;
+  char tbuffer[24];
+  time(&timer);
+  tm_info = localtime(&timer);
+  strftime(tbuffer, sizeof(tbuffer), "%Y-%m-%d %H:%M:%S ", tm_info);
+  fwrite(tbuffer,sizeof(char),sizeof(tbuffer),debugfp);
+  
+  va_list arglist;
+  va_start( arglist, fmt );
+  vfprintf( debugfp, fmt, arglist );
+  va_end( arglist );
+  
+  fprintf(debugfp,"\n");
+  fflush(debugfp);
+}
+
+
+
+// Close the debug log
+void BasicRobot::closeDebug() {
+  fclose(debugfp);
 }

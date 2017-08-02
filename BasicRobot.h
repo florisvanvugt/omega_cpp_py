@@ -19,23 +19,28 @@ using namespace std;
 
 class BasicRobot
 {
-    public:
-        //Functions
-        BasicRobot();
-        virtual ~BasicRobot();
-        void open_sharedmem();
-	void flush_sharedmem();
-        void close_sharedmem();
-        void openDevice();
-        void getPosition();
-        void getVelocity();
-        void closeDevice();
-        bool keep_going();
-        shm_t *getShm();
-    protected:
-      shm_t *sh_memory;
-    private:
-
+ public:
+  //Functions
+  BasicRobot();
+  virtual ~BasicRobot();
+  void open_sharedmem();
+  void flush_sharedmem();
+  void close_sharedmem();
+  void openDevice();
+  void getPosition();
+  void getVelocity();
+  void closeDevice();
+  bool keep_going();
+  shm_t *getShm();
+  void openDebug();
+  void printDebug(const char* data,...);
+  void closeDebug();
+ protected:
+  shm_t *sh_memory;
+ private:
+  FILE* debugfp;
+  //ofstream debugfp;
+  
 };
 
 #endif // BASICROBOT_H

@@ -4,6 +4,7 @@
 #include <math.h>       /* pow */
 #include <memory.h>
 #include <pthread.h>
+#include <ostream>
 
 
 Robot::Robot()
@@ -91,7 +92,7 @@ void Robot::ControllerNull() {
 void Robot::ControllerMoveToPoint() {
   shm_t * sh_memory = getShm();
 
-  double T = sh_memory->movement_duration;
+  //double T = sh_memory->movement_duration;
   (sh_memory->mds)=(sh_memory->movement_duration)/MAIN_LOOP_TIME_S;
 
   if ((sh_memory->movet) >= sh_memory->mds) {
@@ -142,6 +143,8 @@ void Robot::writeLog(){
 
 
 void Robot::mainLoop() {
+
+  printDebug("Entering main loop");
   
   // We are about to enter the main loop. Now let's compute the time
   // we want to do the next iteration of the loop.
@@ -210,6 +213,7 @@ void Robot::mainLoop() {
     sh_memory->iteration_time = t1-t0; // Compute how long the whole iteration took, approximately
 
   }
+  printDebug ("Ending main loop");
 
 }
 
@@ -238,15 +242,20 @@ double Robot::get_wall_time(){
 void launch() {
   
   Robot robot;
+
+  // Start the debug log
+  robot.openDebug();
+  robot.printDebug("Starting robot");
   
   // Initialise the shared memory
+  robot.printDebug("Opening shared memory");
   robot.open_sharedmem();
   shm_t * sh_memory = robot.getShm();
   sh_memory->controller = 0;
   sh_memory->loop_time  = 0;
   // Update the main loop time if so instructed in the shared memory
   sh_memory->main_loop_time = MAIN_LOOP_TIME_S;
-  sh_memory->clocks_per_sec = CLOCKS_PER_SEC;
+  robot.printDebug("Operating loop time %f s",MAIN_LOOP_TIME_S);
 
   // Launch the robot
   robot.openDevice();
@@ -256,6 +265,11 @@ void launch() {
 
   robot.close_sharedmem();
   robot.closeDevice();
+
+  // Close the debug file
+  robot.printDebug("Stopping robot");
+  robot.closeDebug();
+  
 }
 
 
