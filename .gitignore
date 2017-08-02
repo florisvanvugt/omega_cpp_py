@@ -1,3 +1,7 @@
 *.pyc
 log.csv
 *~
+robot_debug.txt
+Robot
+struct_shm.h
+Old

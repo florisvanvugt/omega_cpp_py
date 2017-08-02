@@ -88,6 +88,7 @@ def move_to(x,y,z,t):
     wshm('controller',1) # switch on the controller
 
 
+
     
 def hold_at(x=None,y=None,z=None):
     """
@@ -111,6 +112,10 @@ def hold_at(x=None,y=None,z=None):
     wshm('controller',2)
 
 
+def hold(x=None,y=None,z=None):
+    hold_at(x,y,z)
+    
+    
 
 
 def stay():
