@@ -5,6 +5,9 @@
 #include <memory.h>
 #include <pthread.h>
 #include <ostream>
+#include <signal.h>
+
+Robot robot;
 
 
 Robot::Robot()
@@ -33,20 +36,6 @@ void Robot::compute_minjerk_target (double t){
 }
 
 
-//Calcul de v(t)
-/*void Robot::computeVel (double t) {
-    cVector3d depth;
-    cVector3d result;
-    shm_t *sh_memory = getShm();
-    double T = sh_memory->movement_duration;
-    cVector3d targetPos;
-    cVector3d startPos;
-    targetPos.set(sh_memory->target_x, sh_memory->target_y, sh_memory->target_z);
-    startPos.set(sh_memory->start_x, sh_memory->start_y, sh_memory->start_z);
-    targetPos.subr(startPos,depth);
-    double ratesTime = (30/(T))*pow(t,2)-(60/(T))*pow(t,3)+(30/(T))*pow(t,4);
-    computedVel = cMul(-ratesTime,depth);
-    }*/
 
 
 /* Compute forces as defined by a PD controller.
@@ -67,18 +56,30 @@ void Robot::compute_pd_forces ()
   //localForce.addr(localVel, localForce);
 }
 
+
+
+
+// Apply the forces that we computed
 void Robot::setForce() {
   if (dhdSetForce (fx, fy, fz) < 0) {
-    printf ("error: cannot set force (%s)\n", dhdErrorGetLastStr());
+    printDebug ("error: cannot set force (%s)", dhdErrorGetLastStr());
     sh_memory->quit = 1; // bail out
   }
 }
 
-void Robot::forceToSHM() {
-  shm_t * shm = getShm();
-  shm->fx = fx;
-  shm->fy = fy;
-  shm->fz = fz;
+
+// Remove any forces
+void Robot::zeroForce() {
+  fx=0;fy=0;fz=0;
+  setForce();
+}
+
+
+
+void Robot::updateSHM() {
+  sh_memory->fx = fx;
+  sh_memory->fy = fy;
+  sh_memory->fz = fz;
 }
 
 
@@ -164,14 +165,14 @@ void Robot::mainLoop() {
     sh_memory->loop_iterator+=1;
     
     // Update SHM position et velocity
-    getPosition(); // positionToSHM()
-    //robot.getVelocity(); // velocityToSHM()
+    readSensors();
 
     // Just to be sure, set the forces to zero (actual desired
     // forces will be written in the controllers).
     fx = 0; fy = 0; fz = 0;
 
-    // Execute the controller that is currently selected
+    // Execute the controller that is currently selected,
+    // which will compute the forces fx,fy,fz that we want to apply
     switch (sh_memory->controller) {
     case 0/* value */:
       ControllerNull(); break;
@@ -181,11 +182,12 @@ void Robot::mainLoop() {
       ControllerHoldAtPoint(); break;
     }
 
-    // Apply the forces
+    // Apply the forces to the robot
     setForce();
 
     // Update the shared memory
-    forceToSHM();
+    updateSHM();
+    recordPosition();
     writeLog();
 
     // Get the current time
@@ -206,11 +208,12 @@ void Robot::mainLoop() {
     while (next_iteration_t<t1) {
       // If our current iteration really took too long, we should
       // drop a frame.
+      printDebug ("Frame dropped: now (t=%d) next iteration time (t=%d) already passed",t1,next_iteration_t);
       next_iteration_t += MAIN_LOOP_TIME_S;
       sh_memory->dropped_iterations +=1;
     }
     
-    sh_memory->iteration_time = t1-t0; // Compute how long the whole iteration took, approximately
+    sh_memory->iteration_time = t1-t_loop_begin; // Compute how long the whole iteration took, approximately
 
   }
   printDebug ("Ending main loop");
@@ -219,6 +222,19 @@ void Robot::mainLoop() {
 
 
 
+
+// Bailing out in case of an interruption signal
+void sigint_handler(int s) {
+  robot.printDebug("Caught signal %d",s);
+  printf("Caught signal %d\n",s);
+  //fx=0;fy=0;fz=0;
+  robot.zeroForce();
+  robot.close_sharedmem();
+  robot.closeDevice();
+  robot.printDebug("Stopping robot");
+  robot.closeDebug();
+  exit(1);
+}
 
 
 
@@ -241,8 +257,10 @@ double Robot::get_wall_time(){
 
 void launch() {
   
-  Robot robot;
+  //Robot robot;
 
+  signal(SIGINT,sigint_handler); // set the Control+C handler
+  
   // Start the debug log
   robot.openDebug();
   robot.printDebug("Starting robot");

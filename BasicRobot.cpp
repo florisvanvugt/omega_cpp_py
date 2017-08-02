@@ -17,7 +17,7 @@ bool BasicRobot::keep_going() {
   // Tell us whether the robot needs to quit
   //return true;
   if (sh_memory->quit==1) {
-    printDebug ("Quit signal received");
+    printDebug ("Quit signal received, exiting.");
     return 0;
   }
   return 1;
@@ -30,12 +30,12 @@ void BasicRobot::open_sharedmem() {
 
   //if (exists(fd))
   if( remove( SHM_FILEPATH ) != 0 )
-    perror( "Error deleting shared memory file. Maybe it didn't exist, in which case it's okay" );
+    printDebug( "Error deleting shared memory file. Maybe it didn't exist, in which case it's okay" );
   
   //Open the memory
   fd = open(SHM_FILEPATH, O_RDWR | O_CREAT , (mode_t)0666);
   if (fd == -1) {
-    perror("Error opening file for writing");
+    printDebug("Error opening file for writing");
     exit(EXIT_FAILURE);
   }
 
@@ -45,7 +45,7 @@ void BasicRobot::open_sharedmem() {
   result = lseek(fd, SHM_FILESIZE-1, SEEK_SET);
   if (result == -1) {
     close(fd);
-    perror("Error calling lseek() to 'stretch' the file");
+    printDebug("Error calling lseek() to 'stretch' the file");
     exit(EXIT_FAILURE);
   }
   
@@ -53,7 +53,7 @@ void BasicRobot::open_sharedmem() {
   result = write(fd, "", 1);
   if (result != 1) {
     close(fd);
-    perror("Error writing last byte of the file");
+    printDebug("Error writing last byte of the file");
     exit(EXIT_FAILURE);
   }
   
@@ -64,7 +64,7 @@ void BasicRobot::open_sharedmem() {
   //Verify if the allocation worked
   if (sh_memory == MAP_FAILED) {
     close(fd);
-    perror("Error mmapping the file");
+    printDebug("Error mmapping the file");
     exit(EXIT_FAILURE);
   }
   
@@ -87,11 +87,11 @@ void BasicRobot::flush_sharedmem() {
 //Close the shared memory
 void BasicRobot::close_sharedmem() {
   if (munmap(sh_memory, SHM_FILESIZE) == -1) {
-      perror("Error un-mmapping the file");
+    printDebug("Error un-mmapping the shared memory file");
   }
 
   if( remove( SHM_FILEPATH ) != 0 )
-    perror( "Error deleting shared memory file" );
+    printDebug( "Error deleting shared memory file" );
 }
 
 shm_t *BasicRobot::getShm(){
@@ -108,7 +108,7 @@ void BasicRobot::openDevice() {
   }
   
   // identify device
-  printDebug ("%s device detected", dhdGetSystemName());
+  printDebug ("'%s' device detected", dhdGetSystemName());
   
   // set gravity compensation
   dhdSetGravityCompensation(DHD_ON);
@@ -119,10 +119,11 @@ void BasicRobot::openDevice() {
 }
 
 //Get the position of the robot et put it in the shared memory
-void BasicRobot::getPosition(){
+void BasicRobot::readSensors(){
   double x,y,z;
-   if (dhdGetPosition(&(x),&(y),&(z)) < 0) {
-     printf ("Error: Cannot read the position (%s)\n", dhdErrorGetLastStr());
+  
+   if (dhdGetPosition(&x,&y,&z) < 0) {
+     printDebug ("Error: Cannot read the position (%s)", dhdErrorGetLastStr());
      sh_memory->quit = 1;
    }
 
@@ -130,12 +131,28 @@ void BasicRobot::getPosition(){
    sh_memory->y = y;
    sh_memory->z = z;
 
+   
+   double vx,vy,vz;
+   if (dhdGetLinearVelocity(&vx,&vy,&vz) < 0) {
+     printDebug ("Error: Cannot read the position (%s)", dhdErrorGetLastStr());
+     sh_memory->quit = 1;
+   }
+   sh_memory->vel_x = vx;
+   sh_memory->vel_y = vy;
+   sh_memory->vel_z = vz;
+
+}
+
+
+
+// Record the current position if so requested
+void BasicRobot::recordPosition() {
    if (sh_memory->record_flag == 1) {
      // Test whether we have still space in our buffer, if not, do not record anything
      if (sh_memory->record_iterator<(unsigned)(sizeof(sh_memory->record_x)/sizeof(sh_memory->record_x[0]))) {
-       (sh_memory->record_x)[sh_memory->record_iterator] = x;
-       (sh_memory->record_y)[sh_memory->record_iterator] = y;
-       (sh_memory->record_z)[sh_memory->record_iterator] = z;
+       (sh_memory->record_x)[sh_memory->record_iterator] = (sh_memory->x);
+       (sh_memory->record_y)[sh_memory->record_iterator] = (sh_memory->y);
+       (sh_memory->record_z)[sh_memory->record_iterator] = (sh_memory->z);
        sh_memory->record_iterator = sh_memory->record_iterator+1;
      }
    }
@@ -143,14 +160,6 @@ void BasicRobot::getPosition(){
 
 
 
-
-//Get the velocity of the robot et put it in the shared memory
-void BasicRobot::getVelocity(){
-   if (dhdGetLinearVelocity(&(sh_memory->vel_x),&(sh_memory->vel_y),&(sh_memory->vel_z)) < 0) {
-     printf ("Error: Cannot read the position (%s)\n", dhdErrorGetLastStr());
-     sh_memory->quit = 1;
-   }
-}
 
 //Close the device
 void BasicRobot::closeDevice() {
@@ -178,7 +187,7 @@ char* printformat(string fmt, size_t size, ...)
 
 // Open the debug log file
 void BasicRobot::openDebug() {
-  debugfp = fopen ("robot_debug.txt","a");
+  debugfp = fopen (DEBUG_FILENAME,"a");
   fprintf(debugfp,"\n\n");
 }
 
@@ -211,5 +220,8 @@ void BasicRobot::printDebug(const char *fmt, ...) {
 
 // Close the debug log
 void BasicRobot::closeDebug() {
+  fflush(debugfp);
   fclose(debugfp);
 }
+
+

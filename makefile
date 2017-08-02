@@ -4,6 +4,7 @@ clean:
 	rm -f struct_shm.h
 	rm -f BasicRobot
 	rm -f Robot
+	rm -f robot_debug.txt log.csv
 
 quit:
 	python -c "import robot; robot.init(); robot.wshm('quit',1)"

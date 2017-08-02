@@ -15,6 +15,8 @@
 
 #define SHM_FILEPATH "/tmp/sharedmemory.bin" // the file path where shared memory is located (can be anything but needs to be the same as in sharedmem.py)
 
+#define DEBUG_FILENAME "robot_debug.txt" // the filename for a debug log
+
 using namespace std;
 
 class BasicRobot
@@ -27,14 +29,14 @@ class BasicRobot
   void flush_sharedmem();
   void close_sharedmem();
   void openDevice();
-  void getPosition();
-  void getVelocity();
+  void readSensors();
   void closeDevice();
   bool keep_going();
   shm_t *getShm();
   void openDebug();
   void printDebug(const char* data,...);
   void closeDebug();
+  void recordPosition();
  protected:
   shm_t *sh_memory;
  private:
