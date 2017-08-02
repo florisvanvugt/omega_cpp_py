@@ -5,7 +5,7 @@
 #include "BasicRobot.h"
 
 // The duration of the main loop iteration
-double MAIN_LOOP_TIME_S = .0025; //seconds
+double MAIN_LOOP_TIME_S = .001; //seconds
 
 
 class Robot : public BasicRobot

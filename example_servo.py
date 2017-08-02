@@ -34,6 +34,7 @@ robot.hold(endx,endy,endz)
 
 time.sleep(1)
 stiff,damp = robot.rshm('stiffness'),robot.rshm('damping')
+lt = robot.rshm('main_loop_time')
 
 print("Unloading")
 robot.unload()
@@ -43,6 +44,7 @@ robot.unload()
 with open('servo.json.txt', 'w') as outfile:
     json.dump({"start":(startx,starty,startz),
                "end":(endx,endy,endz),
+               "main.loop.time":lt,
                "stiffness":stiff,"damping":damp,
                "trajectory":traj}, outfile)
 
