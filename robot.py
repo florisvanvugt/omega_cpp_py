@@ -10,9 +10,13 @@ STIFFNESS = 2000
 DAMPING = 20
 
 
+# The directory where the robot scripts are located
+robot_dir = "."
+
+
 def init():
     """ Initialises the robot and the shared memory """
-    init_specifications()
+    init_specifications(robot_dir)
     init_shared_memory()
     wshm('controller',0)
     print("Waiting for robot to become active...")
@@ -21,12 +25,20 @@ def init():
     print("ready.")
 
 
-def launch():
+def launch(basedir="."):
     """ Launches the robot process."""
     # Launch the C process controlling the robot (which will allocate the shared memory that we will then connect to)
-    res = subprocess.call(['./run_robot.sh'])
-    if (res != 0):
-        print("Error in calling main!")
+    out = subprocess.Popen('./run_robot.sh',cwd=basedir)
+    outp= out.communicate()[0]
+    res = out.returncode
+    if res!=0:
+        print("## ERROR LOADING ROBOT")
+    print(outp)
+
+    global robot_dir
+    robot_dir = basedir
+
+    return res
 
         
 def load(): ## DEPRECATED

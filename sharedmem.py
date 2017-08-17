@@ -4,9 +4,11 @@ import struct
 
 
 
-def init_specifications():
+def init_specifications(basedir):
     """Read the shared_memory_specification.txt file and parse it """
-    f = open("shared_memory_specification.txt", "r")
+    memspecf = "%s/shared_memory_specification.txt"%basedir
+    print("Reading memory specification from %s"%memspecf)
+    f = open(memspecf, "r")
 
     #Creation d'un dictionnaire avec tous les elements necessaires par la suite
     contenu = f.read()
