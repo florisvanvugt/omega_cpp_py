@@ -51,6 +51,34 @@ robot.unload() #Stop the C++ script
 ```
 
 
+## Loading as a subdirectory
+
+What I recommend is that you keep your own code separate from this robot code. The reason for this is that the Python-C++ robot interface code may evolve and so you may want to easily take a newer version of the robot code and replace it in your own experiment code.
+
+In order to achieve this, here is what I suggest.
+
+1. Create a directory that holds your experiment, for example `experiment_A`.
+
+2. Inside `experiment_A`, clone this repository.
+
+```
+cd experiment_A
+git clone https://github.com/florisvanvugt/omega_cpp_py.git
+```
+
+3. Create your experimental script, for example `experiment_A/run.py`. Inside this file, use the following syntax to use the robot:
+
+```python
+import omega_cpp_py.robot as robot
+robot.launch()
+robot.init()
+# Your code here
+robot.unload()
+```
+
+In this way, when the `omega_cpp_py` code is updated, you can simply replace the `omega_cpp_py` directory with the latest version, and your code should run correctly.
+
+
 
 ## Files
 
