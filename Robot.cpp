@@ -111,7 +111,7 @@ void Robot::setForce() {
 // Remove any forces
 void Robot::zeroForce() {
   fx=0;fy=0;fz=0;
-  setForce();
+  setForce(); // apply
 }
 
 
@@ -150,6 +150,17 @@ void Robot::ControllerMoveToPoint() {
     (sh_memory->move_iterator)++;
   }
 }
+
+
+
+
+void Robot::ControllerViscousForceField() {
+  // A simple viscous force field controller.
+  fx = -sh_memory->viscosity * sh_memory->vel_x;
+  fy = -sh_memory->viscosity * sh_memory->vel_y;
+  fz = -sh_memory->viscosity * sh_memory->vel_z;
+}
+
 
 
 
@@ -207,7 +218,7 @@ void Robot::mainLoop() {
     // Keep track of how often we went through this loop
     sh_memory->loop_iterator+=1;
     
-    // Update SHM position et velocity
+    // Read position and velocity from the sensors
     readSensors();
 
     // Just to be sure, set the forces to zero (actual desired
@@ -217,21 +228,23 @@ void Robot::mainLoop() {
     // Execute the controller that is currently selected,
     // which will compute the forces fx,fy,fz that we want to apply
     switch (sh_memory->controller) {
-    case 0/* value */:
+    case 0:   /* null field (no forces) */
       ControllerNull(); break;
-    case 1/*movement to point*/:
+    case 1:   /*movement to point*/
       ControllerMoveToPoint(); break;
-    case 2/*hold at point*/:
+    case 2:   /*hold at point*/
       ControllerHoldAtPoint(); break;
+    case 3:   /*viscous force*/
+      ControllerViscousForceField(); break;
     }
 
     // Apply the forces to the robot
     setForce();
 
     // Update the shared memory
-    updateSHM();
-    recordPosition();
-    writeLog();
+    updateSHM();      // update the SHM
+    recordPosition(); // record the current position if we are currently recording
+    writeLog();       // write the log if we are currently supposed to output a log
 
     // Get the current time
     double t1 = get_wall_time();

@@ -22,7 +22,7 @@ class Robot : public BasicRobot
   void ControllerNull();
   void ControllerMoveToPoint();
   void ControllerHoldAtPoint();
-  
+  void ControllerViscousForceField();
   void updateSHM();
   void writeLog();
   void sigint_handler(int s);

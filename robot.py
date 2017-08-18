@@ -4,9 +4,13 @@ import os
 import time
 
 
-# Stiffness to use for the movement controller
+# Default stiffness and damping to use for the movement controller
 STIFFNESS = 2000
 DAMPING = 20
+
+
+# Default viscosity used for a viscous controller
+VISCOSITY = 20
 
 
 # The directory where the robot scripts are located
@@ -71,6 +75,12 @@ def safe_unload():
     so that when we remove forces, it doesn't drop all of a sudden."""
     return_home()
     unload()
+
+
+
+def release():
+    """ Release the robot (null field)."""
+    wshm('controller',0)
 
     
 
@@ -144,6 +154,12 @@ def stay_at(x,y,z):
     hold_at(x,y,z)
     
 
+    
+def viscous_force(viscosity=VISCOSITY):
+    """Hold the robot at the current position."""
+    wshm('viscosity',viscosity)
+    wshm('controller',3)
+    
     
 
 

@@ -15,6 +15,10 @@ vel_x : d
 vel_y : d
 vel_z : d
 
+# Control over viscous force field
+viscosity : d
+
+
 # Functionality for recording the trajectories.
 record_x : 4000d
 record_y : 4000d
