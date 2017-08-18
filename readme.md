@@ -122,7 +122,7 @@ For more information about memory alignment, see e.g. [some Stack overflow discu
 - [ ] **Mock Inmotion** with some adjustments, we could pretend this is a planar robot and use it to test Inmotion2 code.
 - [ ] **Super-user** do we have to be that to launch the robot code?
 - [ ] **Instability** of the servo control - I wonder what this is due to?
-
+- [ ] Separate the user-defined controllers from the rest of the code
 
 
 ## Programmer's notes
