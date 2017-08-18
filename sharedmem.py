@@ -1,32 +1,40 @@
 import os
 import mmap
 import struct
+import yaml
 
+
+specification_file = 'shared_memory_specification.yaml'
+
+
+# This variable tells us where the variables are to be found
+specifications = {}
+
+# The order of the variables
+variable_order = []
 
 
 def init_specifications(basedir):
-    """Read the shared_memory_specification.txt file and parse it """
-    memspecf = "%s/shared_memory_specification.txt"%basedir
+    """
+    Read the shared_memory_specification.txt file and parse it
+    """
+    memspecf = "%s/%s"%(basedir,specification_file)
     print("Reading memory specification from %s"%memspecf)
-    f = open(memspecf, "r")
 
-    #Creation d'un dictionnaire avec tous les elements necessaires par la suite
-    contenu = f.read()
-    lignes = contenu.split("\n")
+    with open(memspecf,'r') as f:
+        memsp = yaml.load(f)
+
     address = 0 # this variable keeps track of the address in shared memory where we currenlty are
-    global specifications
+    global specifications # start building a memory specification variable
     specifications = {}
-    for i in lignes:
-        if (i != ''):
-            variable = i.split(" ")
-            if len(variable)==2:
-                varname,vartype = variable
-                sz = struct.calcsize(vartype)
-                specifications[varname] = (vartype,address,sz)
-                address += sz   # keep our running count of the memory offset
-            else:
-                print("Not sure what to do with line '%s'"%i)
-    f.close()
+    global variable_order # keep track of the order of the variables (should be alphabetical but we want to make sure this is right)
+    variable_order = []
+    
+    for varname,vartype in memsp.iteritems():
+        sz = struct.calcsize(vartype)
+        specifications[varname] = (vartype,address,sz)
+        address += sz   # keep our running count of the memory offset
+        variable_order.append(varname)
 
 
 

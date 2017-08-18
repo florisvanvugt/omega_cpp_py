@@ -13,6 +13,7 @@ Python 2 with the following modules:
 * `subprocess` which is used to launch the C++ part of the code.
 * `numpy` for numeric computation.
 * `mmap` for creating the shared memory and accessing it.
+* `pyaml` to parse the shared memory specification
 
 These last can be install easily using the command `sudo apt-get install python-<module's name>` or using `pip`.
 
@@ -91,7 +92,7 @@ All the files C++ and python need to be in the same folder to be executed.
 Core files:
 
 * `BasicRobot.cpp` and `Robot.cpp` -- contains all the C++ code which controls the robot at a lower level than Python code.
-* `shared_memory_specification.txt` -- specifies the structure of the shared memory. This is read both by Python and by C++. You can freely add your own variables but be careful when you remove existing variables since some of the code may depend on them.
+* `shared_memory_specification.yaml` -- specifies the structure of the shared memory. This is read both by Python and by C++. You can freely add your own variables but be careful when you remove existing variables since some of the code may depend on them.
 * `create_c_header.py` -- create the C++ header file which contains the structure of the shared memory for the C++ code
 * `sharedmem.py` -- infrastructure for accessing the shared memory
 * `robot.py` -- contains simple functions to control the robot
@@ -122,13 +123,13 @@ Quite easy: you need to write a custom controller function that sets the forces 
 
 ## Shared memory
 
-In reality, the robot can only be controlled by a C++ program. But we want to run the experiment with python, that is why we need to use a shared memory. In the `shared_memory_specification.txt` document, we write the parameter that we want to add in the shared memory. `create_c_header.py` creates the C++ header file which contains the structure used by the C++ script to write into the shared memory. The C++ program create a shared memory after having computed the size of this one thanks to the `shared_memory_specification.txt`. From within Python, it is quite easy to access to the shared memory. Actually, to read a parameter, you can use this function `robot.rshm(variable's name)`, and to write in this one, you need to use the function `robot.wshm(variable'name, value)`.
+In reality, the robot can only be controlled by a C++ program. But we want to run the experiment with python, that is why we need to use a shared memory. In the `shared_memory_specification.yaml` document, we write the parameter that we want to add in the shared memory. `create_c_header.py` creates the C++ header file which contains the structure used by the C++ script to write into the shared memory. The C++ program create a shared memory after having computed the size of this one thanks to the `shared_memory_specification.yaml`. From within Python, it is quite easy to access to the shared memory. Actually, to read a parameter, you can use this function `robot.rshm(variable's name)`, and to write in this one, you need to use the function `robot.wshm(variable'name, value)`.
 
-Each line in the `shared_memory_specification.txt` creates one variable in the shared memory. Each variable has a name and a type. The types conform to the `struct` specification in Python ([see here for a specification](https://docs.python.org/2/library/struct.html#format-characters)).
+Each line in the `shared_memory_specification.yaml` creates one variable in the shared memory. Each variable has a name and a type. The types conform to the `struct` specification in Python ([see here for a specification](https://docs.python.org/2/library/struct.html#format-characters)).
 
 For example, the line
 ```
-x d
+x : d
 ```
 
 creates a variable named `x` which has a double floating point precision value.
@@ -138,12 +139,12 @@ You can then access this variable in C++ as `shared_memory->x` and you can read/
 
 Lists of values can be created using:
 ```
-record_x 4000d
+record_x : 4000d
 ```
 
 which creates a list of 4000 doubles, for example to hold a trajectory in shared memory.
 
-IMPORTANT: In the `shared_memory_specification.txt`, you can only put long int or double because C++ allocates only trunks of 8 bytes. if you put a int which takes 4 bytes and then a double, the double's address is going to be 4 bytes higher. As it is not the case in python, this is a problem because parameters in the shared memory did not have the same address' offset.  
+IMPORTANT: In the `shared_memory_specification.yaml`, you can only put long int or double because C++ allocates only trunks of 8 bytes. if you put a int which takes 4 bytes and then a double, the double's address is going to be 4 bytes higher. As it is not the case in python, this is a problem because parameters in the shared memory did not have the same address' offset.  
 
 For more information about memory alignment, see e.g. [some Stack overflow discussion](https://stackoverflow.com/questions/5435841/memory-alignment-in-c-structs) and many other pages online.
 
@@ -158,7 +159,7 @@ For more information about memory alignment, see e.g. [some Stack overflow discu
 - [ ] **Super-user** do we have to be that to launch the robot code?
 - [ ] **Instability** of the servo control - I wonder what this is due to?
 - [ ] Separate the user-defined controllers from the rest of the code
-- [ ] Use YAML style shared memory declaration.
+- [x] Use YAML style shared memory declaration.
 
 ## Programmer's notes
 
