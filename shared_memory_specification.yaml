@@ -1,0 +1,67 @@
+
+# Whether the robot is currently active
+active : q
+
+# Current robot position (x,y,z)
+x : d
+y : d
+z : d
+
+# Forces currently written by the controller. Don't change these within Python, because whatever they are the controller will overwrite them.
+fx : d
+fy : d
+fz : d
+vel_x : d
+vel_y : d
+vel_z : d
+
+# Functionality for recording the trajectories.
+record_x : 4000d
+record_y : 4000d
+record_z : 4000d
+record_flag : q   # whether we are currently recording
+record_iterator : q
+
+# Variables for controlling servo movement
+move_done : q
+# starting location of the movement
+start_x : d
+start_y : d
+start_z : d
+# desired end location of the movement
+target_x : d
+target_y : d
+target_z : d
+# stiffness and damping of the PD controller
+stiffness : d
+damping : d
+# desired current position (changes over time)
+desired_x : d
+desired_y : d
+desired_z : d
+# desired current velocity
+desired_vel_x : d
+desired_vel_y : d
+desired_vel_z : d
+# the number of loop iterations spent generating the current servo movement
+move_iterator : q
+
+# Stats about the performance, loop time, etc.
+loop_time : d
+iteration_time : d
+dropped_iterations : q # number of dropped loops (because of insufficient time)
+movement_duration : d
+main_loop_time : d
+t : d
+loop_iteration_time : q
+loop_iterator : q
+clock : d
+
+# The controller currently active (0=null field)
+controller : q
+
+# Whether to write to the log
+write_log : q
+
+# Put this to 1 to have the robot quit itself.
+quit : q

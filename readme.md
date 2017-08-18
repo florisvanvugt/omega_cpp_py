@@ -153,7 +153,7 @@ For more information about memory alignment, see e.g. [some Stack overflow discu
 
 ## Issues / TODO
 - [ ] **Logging to a specified file** Currently we log to `log.csv` always. However, I am starting to think we should do logging only through Python pulling from shared memory, because in this way you have access to data immediately and don't need to search through the robot log after the fact.
-- [ ] **Allow comments in shared memory specification**
+- [x] **Allow comments in shared memory specification**
 - [ ] **Benchmark testing** of desired trajectory and actually produced trajectory.
 - [ ] **Mock Inmotion** with some adjustments, we could pretend this is a planar robot and use it to test Inmotion2 code.
 - [ ] **Super-user** do we have to be that to launch the robot code?

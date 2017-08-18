@@ -12,7 +12,7 @@ quit:
 kill:
 	sudo pkill Robot
 
-struct_shm.h: create_c_header.py shared_memory_specification.txt
+struct_shm.h: create_c_header.py shared_memory_specification.yaml
 	python create_c_header.py     # creates struct_shm.h
 
 robot : Robot.cpp Robot.h BasicRobot.cpp struct_shm.h
