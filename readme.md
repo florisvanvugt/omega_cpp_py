@@ -5,6 +5,8 @@ This code is based heavily on code developed by Mathilde Chaplain as part of her
 
 This is a simple interface for the Omega Robot. It is implemented in Python 2 but the part which controls the robot is still in C++.
 
+
+
 ## Requirements
 
 Python 2 with the following modules:
@@ -22,7 +24,7 @@ To run the robot you also need to install libusb1, under Ubuntu this can be achi
 
 ## Usage
 
-Turn on the Omega robot using the switch in the back. One of the two front LEDs will blink. Press the `RESET` button on the robot controller box. Now you should be good to go.
+Turn on the Omega robot using the switch in the back. One of the two front LEDs will blink. Press the `RESET` button on the robot controller box, while holding the robot to the most extreme front position (pulling it all the way towards you). Then you can press the button that enables the forces. Now you should be good to go.
 
 The robot C++ scripts (`BasicRobot.cpp` and `Robot.cpp`) are in the principal folder (`omega_cpp_py/`) and need to be compiled. For this, you need to be in this directory and write this command from the prompt:
 
@@ -78,6 +80,8 @@ robot.unload()
 
 In this way, when the `omega_cpp_py` code is updated, you can simply replace the `omega_cpp_py` directory with the latest version, and your code should run correctly.
 
+Before launching your script, you have to make sure you compile the robot code, which you can do from the folder `experiment_A` by calling `make -C experiment_A`.
+
 
 
 ## Files
@@ -129,6 +133,9 @@ x d
 
 creates a variable named `x` which has a double floating point precision value.
 
+You can then access this variable in C++ as `shared_memory->x` and you can read/write to it in Python using `rshm('x')` and `wshm('x',value)`.
+
+
 Lists of values can be created using:
 ```
 record_x 4000d
@@ -151,7 +158,7 @@ For more information about memory alignment, see e.g. [some Stack overflow discu
 - [ ] **Super-user** do we have to be that to launch the robot code?
 - [ ] **Instability** of the servo control - I wonder what this is due to?
 - [ ] Separate the user-defined controllers from the rest of the code
-
+- [ ] Use YAML style shared memory declaration.
 
 ## Programmer's notes
 
