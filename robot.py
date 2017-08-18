@@ -4,14 +4,14 @@ import os
 import time
 
 
-
 # Stiffness to use for the movement controller
 STIFFNESS = 2000
 DAMPING = 20
 
 
 # The directory where the robot scripts are located
-robot_dir = "."
+robot_dir = os.path.dirname(os.path.realpath(__file__))
+#robot_dir = "."
 
 
 def init():
@@ -25,18 +25,21 @@ def init():
     print("ready.")
 
 
-def launch(basedir="."):
+def launch(basedir=None):
     """ Launches the robot process."""
     # Launch the C process controlling the robot (which will allocate the shared memory that we will then connect to)
-    out = subprocess.Popen('./run_robot.sh',cwd=basedir)
+
+    if basedir!=None:
+        global robot_dir
+        robot_dir = basedir
+        
+    out = subprocess.Popen('./run_robot.sh',cwd=robot_dir)
     outp= out.communicate()[0]
     res = out.returncode
     if res!=0:
         print("## ERROR LOADING ROBOT")
-    print(outp)
-
-    global robot_dir
-    robot_dir = basedir
+    if outp:
+        print("Robot loading: ",outp)
 
     return res
 
