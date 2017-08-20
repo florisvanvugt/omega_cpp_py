@@ -117,7 +117,9 @@ Quite simple, call `robot.start_capture()` and some time later, `robot.stop_capt
 
 ### Writing your own controller
 
-Quite easy: you need to write a custom controller function that sets the forces `fx, fy, fz` and call this function from the `Robot::mainLoop()` function defined in `Robot.cpp`. To activate the controller from within Python, call `robot.controller(N)` where `N` is the number you assigned to your controller.
+Fairly easy: you can add code for your controller to `Controllers.cpp`. A controller is a function that takes the shared memory as argument and returns a triplet of forces (`setforce_t`). These forces are then applied by the robot code as part of the main loop. Which controller is executed at any given time is specified in the function `forceFromController`. Essentially, this function looks what controller number is currently set in the shared memory, and then depending on that calls a function in `Controllers.cpp` to actually compute the forces.
+
+To activate the controller from within Python, call `robot.controller(N)` where `N` is the number you assigned to your controller.
 
 
 
@@ -158,8 +160,11 @@ For more information about memory alignment, see e.g. [some Stack overflow discu
 - [ ] **Mock Inmotion** with some adjustments, we could pretend this is a planar robot and use it to test Inmotion2 code.
 - [ ] **Super-user** do we have to be that to launch the robot code?
 - [ ] **Instability** of the servo control - I wonder what this is due to?
-- [ ] Separate the user-defined controllers from the rest of the code
+- [x] Separate the user-defined controllers from the rest of the code
 - [x] Use YAML style shared memory declaration.
+
+
+
 
 ## Programmer's notes
 
