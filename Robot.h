@@ -3,6 +3,7 @@
 
 
 #include "BasicRobot.h"
+#include "Controllers.h"
 
 // The duration of the main loop iteration
 double MAIN_LOOP_TIME_S = .001; //seconds
@@ -15,26 +16,17 @@ class Robot : public BasicRobot
   virtual ~Robot();
   
   void mainLoop();
-  void compute_minjerk_target (double movt,double movdur);
-  void setForce();
+  //void compute_minjerk_target (double movt,double movdur);
+  void setForce(setforce_t* desired_f);
   void zeroForce();
   
-  void ControllerNull();
-  void ControllerMoveToPoint();
-  void ControllerHoldAtPoint();
-  void ControllerViscousForceField();
-  void updateSHM();
+  void updateSHM(setforce_t* desired_f);
   void writeLog();
   void sigint_handler(int s);
   
  protected:
-  double fx;
-  double fy;
-  double fz;
   
  private:
-  void compute_pd_forces ();
-  void compute_p_forces ();
   double get_wall_time();
   //void computeVel (double t);
 };

@@ -144,7 +144,7 @@ record_x : 4000d
 
 which creates a list of 4000 doubles, for example to hold a trajectory in shared memory.
 
-IMPORTANT: In the `shared_memory_specification.yaml`, you can only put long int or double because C++ allocates only trunks of 8 bytes. if you put a int which takes 4 bytes and then a double, the double's address is going to be 4 bytes higher. As it is not the case in python, this is a problem because parameters in the shared memory did not have the same address' offset.  
+IMPORTANT: In the `shared_memory_specification.yaml`, you can only put long int or double because C++ allocates only trunks of 8 bytes. if you put a int which takes 4 bytes and then a double, the double's address is going to be 4 bytes higher. As it is not the case in python, this is a problem because parameters in the shared memory did not have the same address' offset.
 
 For more information about memory alignment, see e.g. [some Stack overflow discussion](https://stackoverflow.com/questions/5435841/memory-alignment-in-c-structs) and many other pages online.
 
@@ -168,4 +168,4 @@ Sometimes, when the program is not well-closed, the Robot C++ process can stay o
 In this case you can try and run `make quit` which will send the robot the instruction to quit through the shared memory. If this does not work, you can run `make kill` which will attempt to kill the robot process (the hard way).
 
 If for some reason the robot is no longer listening to the shared memory, you need to kill the Robot process manually from the prompt.
-For that, you have to invoke the command `ps -Al`, looking for the robot process' ID and then, you need to do `sudo kill <ID>`.  
+For that, you have to invoke the command `ps -Al`, looking for the robot process' ID and then, you need to do `sudo kill <ID>`.
