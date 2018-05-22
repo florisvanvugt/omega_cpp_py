@@ -19,7 +19,7 @@ These last can be install easily using the command `sudo apt-get install python-
 
 We have been running this on a 64-bit version of Xunbuntu 16.04.02, running kernel `4.4.0-87-generic`.
 
-To run the robot you also need to install libusb1, under Ubuntu this can be achieved through `sudo apt install libusb-1.0-0-de`.
+To run the robot you also need to install libusb1, under Ubuntu this can be achieved through `sudo apt install libusb-1.0-0-dev`.
 
 
 
