@@ -1,7 +1,7 @@
 
 # Omega C++ / Python code
 
-This code is based heavily on code developed by Mathilde Chaplain as part of her internship at the Motor Control Lab. The code is built on the Omega robot drivers which you can download from the manufacturer (`dhd-3.2.2.1466-linux-x86_64.tar.gz` [which you can download here]((http://www.forcedimension.com/download/sdk)).
+This code is based heavily on code developed by Mathilde Chaplain as part of her internship at the Motor Control Lab. The code is built on the Omega robot drivers which you can download from the manufacturer (`dhd-3.2.2.1466-linux-x86_64.tar.gz` which you can [download here](http://www.forcedimension.com/download/sdk).
 
 This is a simple interface for the Omega Robot. It is implemented in Python 2 but the part which controls the robot is still in C++.
 
