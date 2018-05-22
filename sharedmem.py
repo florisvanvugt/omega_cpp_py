@@ -63,6 +63,10 @@ def find_variable(var):
 def rshm(var):
     """ Reads the shared memory value associated with the given variable,
     for example rshm('x') """
+
+    if isinstance(var, list):
+        return [rshm(v) for v in var]
+    
     tp,offset,size = find_variable(var)
 
     # Extract the memory chunk associated with this variable (still needs to be decoded)
