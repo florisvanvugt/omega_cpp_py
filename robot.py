@@ -39,7 +39,7 @@ def launch(basedir=None):
         global robot_dir
         robot_dir = basedir
 
-    out = subprocess.Popen('./run_robot.sh',cwd=robot_dir,shell=True)
+    out = subprocess.Popen('sudo ./run_robot.sh',cwd=robot_dir,shell=True)
     outp= out.communicate()[0]
     res = out.returncode
     if res!=0:

@@ -13,5 +13,8 @@ while((i<50) and (robot.rshm('quit') != 1)):
     print("x=%f  &  y=%f  &  z=%f"%(x, y, z))
     time.sleep(.1)
     i += 1
+
+print("Unloading...")
 robot.unload()
 time.sleep(1)
+
