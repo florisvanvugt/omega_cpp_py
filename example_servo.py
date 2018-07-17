@@ -28,7 +28,7 @@ robot.start_capture()
 print("Moving to end")
 while not robot.move_is_done():
     pass
-traj = robot.stop_capture()
+traj = robot.stop_capture(True)
 print("Holding")
 robot.hold(endx,endy,endz)
 
@@ -49,7 +49,7 @@ with open('servo.json.txt', 'w') as outfile:
                "trajectory":traj}, outfile)
 
 
-    
+
 
 plt.plot(traj)
 (x,y,z)=traj[-1]
@@ -57,6 +57,3 @@ plt.text(len(traj),x,'x')
 plt.text(len(traj),y,'y')
 plt.text(len(traj),z,'z')
 plt.show()
-
-
-

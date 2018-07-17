@@ -1,15 +1,14 @@
 
 # Omega C++ / Python code
 
-This code is based heavily on code developed by Mathilde Chaplain as part of her internship at the Motor Control Lab. The code is built on the Omega robot drivers which you can download from the manufacturer (`dhd-3.2.2.1466-linux-x86_64.tar.gz` which you can [download here](http://www.forcedimension.com/download/sdk).
-
-This is a simple interface for the Omega Robot. It is implemented in Python 2 but the part which controls the robot is still in C++.
+This code is developed in collaboration with Mathilde Chaplain and Simon Subias as part of their internships at the Motor Control Lab. This is a simple interface for the Omega Robot. It is implemented in Python 2 but the part which controls the robot is still in C++.
 
 
 
 ## Requirements
 
 Python 2 with the following modules:
+
 * `subprocess` which is used to launch the C++ part of the code.
 * `numpy` for numeric computation.
 * `mmap` for creating the shared memory and accessing it.
@@ -21,9 +20,23 @@ We have been running this on a 64-bit version of Xunbuntu 16.04.02, running kern
 
 To run the robot you also need to install libusb1, under Ubuntu this can be achieved through `sudo apt install libusb-1.0-0-dev`.
 
+To install the right compiler g++ you just have to use the command `sudo apt-get install build-essential`
+
+
 
 
 ## Usage
+
+### Switch between the lab and the hospital
+
+The Omega in the lab and the Sigma in the Jewish hospital aren't using the same SDK, they use different headers and libraries. To switch from one to the other, you just have to put "lab" or "hosp" in the FLAG in the `makefile`.
+
+
+
+### Usage with the Omega robot
+
+The library used here is an updated version of `dhd-3.2.2.1466-linux-x86_64.tar.gz`. The manufacturer sent us a version that actually compiles under Ubuntu 18 as well. But you can download the official one which only compiles under Ubuntu 16 [download here](http://www.forcedimension.com/download/sdk).
+
 
 Turn on the Omega robot using the switch in the back. One of the two front LEDs will blink. Press the `RESET` button on the robot controller box, while holding the robot to the most extreme front position (pulling it all the way towards you). Then you can press the button that enables the forces. Now you should be good to go.
 
@@ -52,6 +65,39 @@ time.sleep(2) # during 2 seconds
 
 robot.unload() #Stop the C++ script
 ```
+
+
+
+
+### Usage with the Sigma robot
+
+The Sigma robot at the hospital is working with another version of the SDK : `sdk-3.7.0.3146-linux-x86_64-gcc.tar.gz` which you can [download here](http://www.forcedimension.com/download/sdk).
+
+1. Put the robot in the central top position (should be there by default anyway)
+2. Switch on the robot controller box (grey box)
+3. Press the "forces on/off"  button for two seconds until the green LED stops blinking and becomes on all the time (this is the calibration step)
+4. Launch the robot code (Python)
+5. Note that when you launch the robot from within Python, it starts in no-force mode, which you can see from the red LED "forces on/off" being off. So you will have to press the "forces on/off" button to enable the forces, before going on with your experiment code.
+
+
+If you don't do 2, then you can find the robot device, but you cannot read meaningful positions (you just get the same position values x,y,z all the time). This is because pressing the force button also calibrates the position sensors (we think).
+
+
+#### Notes
+
+dmesg should tell you something like this when you connect the USB of the robot
+
+```
+[  454.224284] usb 2-1.6: USB disconnect, device number 3
+[  456.648018] usb 2-1.6: new high-speed USB device number 4 using ehci-pci
+[  456.758306] usb 2-1.6: New USB device found, idVendor=1451, idProduct=0401
+[  456.758309] usb 2-1.6: New USB device strings: Mfr=1, Product=2, SerialNumber=0
+[  456.758312] usb 2-1.6: Product: sigma.7 Haptic Device
+[  456.758314] usb 2-1.6: Manufacturer: FD 3.x
+```
+
+
+
 
 
 ## Loading as a subdirectory
@@ -113,6 +159,7 @@ To control the robot main loop iteration time (the number of cycles per second) 
 ### Recording a trajectory
 
 Quite simple, call `robot.start_capture()` and some time later, `robot.stop_capture()`, the latter function will return a list of captured positions, coded as a tuple `(x,y,z)`.
+However `robot.start_capture(False)` will just return this list and `robot.start_capture(True)` will return this list and stop the capture.
 
 
 ### Writing your own controller
@@ -150,6 +197,35 @@ IMPORTANT: In the `shared_memory_specification.yaml`, you can only put long int 
 
 For more information about memory alignment, see e.g. [some Stack overflow discussion](https://stackoverflow.com/questions/5435841/memory-alignment-in-c-structs) and many other pages online.
 
+
+
+### Instruction vs. live memory
+
+The program edits two different shared memories: instruction and live. Python is able to write in the instruction shared-memory and to read in the live shared memory. C++ is able to read both and is able to write only in the live memory. The variables in the `shared_instruction_memory` are existing in the `shared_live_memory` but they are copied into the live memory when the number `instruction_no` is incremented. Therefore we don’t have concurrency problem because when the C++ detect a new instruction that will block the loop until all the instructions are loaded. Moreover it is a protection, we cannot access to the live memory anymore with Python and the C++ is not able to change the initial instruction.
+
+When you send a new instruction (i.e. you increment `instruction_no`) then a set of variables is copied from the instruction shared memory into the live memory, at which point the robot will start following those instructions. However, note that not *all* variables are copied from the instruction to the live memory (if that happens, recording would interfere with other controllers, potentially). Instead, variables come in groups defined in `variable_groups.yaml`. 
+For example, this line defines a variable group:
+
+```
+2 : ["stiffness", "damping", "target_x","controller"]
+```
+
+The number of that group is `2`, so within Python, when we send a new instruction set, we should call `wshm('prefix',2)` which will tell C that it needs to push the variables from the above group into the live memory.
+
+
+
+
+
+## Protection
+
+If the target is out of the robot limits or requires too much speed move_to, hold_at or play_movement fail and the movement_canceled flag in the shared memory warns Python of this failure. Before define a movement it checks this movement_canceled flag. The x,y,z limits and velocity limit are parameters and can be defined in robot.cpp in the launch function. There is also a function protection in the C code which can be activated but it is now a commentary. It calls the controller null if the desired_position is too far from the current position.
+
+
+
+
+## Schema
+
+![schema](./schema.png "Summary Diagram")
 
 
 

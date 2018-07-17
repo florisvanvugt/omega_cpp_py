@@ -1,6 +1,6 @@
 
-struct shm_t; // forward decl
-
+struct shm_instr_t; // forward decl
+struct shm_live_t; // forward decl
 
 struct setforce_t {
   // The forces to be applied in the x,y,z direction
@@ -16,5 +16,5 @@ struct setforce_t {
 
 
 
-setforce_t* forceFromController(shm_t* shm);
-
+setforce_t* forceFromController(shm_live_t* shm);
+bool protection (shm_live_t* shm);

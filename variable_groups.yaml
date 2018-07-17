@@ -1,0 +1,33 @@
+
+# Move_to
+0 : ["stiffness", "damping", "target_x", "target_y", "target_z","movement_duration","start_x","start_y","start_z","move_done","move_iterator","controller", "movement_cancelled" ]
+
+# Hold
+1 : ["stiffness", "damping", "target_x", "target_y", "target_z","controller", "movement_cancelled"]
+
+# Three_d_to_two_d
+2 : ["stiffness", "damping", "target_x","controller"]
+
+# Load_a_trajectory
+3 : ["trajectory_size","new_trajectory","movement_cancelled"]
+
+# Play a trajectory
+4 : ["stiffness", "damping","controller", "movement_cancelled", "move_done", "move_iterator" ]
+
+# Viscous_force
+5 : ["viscosity", "controller"]
+
+# Active_to_null
+6 : ["move_done", "active_to_null", "move_iterator", "controller" ]
+
+# Release
+7 : ["controller"]
+
+# Start capture
+8 : ["record_iterator","record_flag"]
+
+# Stop_capture
+9 : ["record_flag"]
+
+# Unload
+9 : ["quit"]

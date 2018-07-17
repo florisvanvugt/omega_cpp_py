@@ -1,4 +1,61 @@
 
+--- #instruction memory ( Py and C++ have both Writing and Reading access )
+
+# Flag to indicate when the instruction are ready to be copied in the live_shared_memory
+instruction_no : d
+prefix : d
+
+# Control over viscous force field
+viscosity : d
+
+# Variables for controlling servo movement
+move_done : q
+
+# desired end location  and duration of the movement
+target_x : d
+target_y : d
+target_z : d
+movement_duration : d
+
+# Desired trajectory
+new_trajectory : q
+trajectory_size : d
+trajectory_x : 40000d
+trajectory_y : 40000d
+trajectory_z : 40000d
+
+# starting location of the movement
+start_x : d
+start_y : d
+start_z : d
+
+# the number of loop iterations spent generating the current servo movement
+move_iterator : q
+
+# stiffness and damping of the PD controller
+stiffness : d
+damping : d
+
+# Time for the forces to decrease (ms)
+active_to_null : d
+
+# Functionality for recording the trajectories.
+record_flag : q   # whether we are currently recording
+record_iterator : q
+
+# The controller currently active (0=null field)
+controller : q
+
+# Protection
+movement_cancelled : d
+
+# Put this to 1 to have the robot quit itself.
+quit : q
+
+
+...
+---  #live memory ( Py and C++ are able to read this part but only C++ is able to write )
+
 # Whether the robot is currently active
 active : q
 
@@ -15,57 +72,44 @@ vel_x : d
 vel_y : d
 vel_z : d
 
-# Control over viscous force field
-viscosity : d
-
-
 # Functionality for recording the trajectories.
-record_x : 4000d
-record_y : 4000d
-record_z : 4000d
-record_flag : q   # whether we are currently recording
-record_iterator : q
+record_x : 40000d
+record_y : 40000d
+record_z : 40000d
 
-# Variables for controlling servo movement
-move_done : q
-# starting location of the movement
-start_x : d
-start_y : d
-start_z : d
-# desired end location of the movement
-target_x : d
-target_y : d
-target_z : d
-# stiffness and damping of the PD controller
-stiffness : d
-damping : d
+
 # desired current position (changes over time)
 desired_x : d
 desired_y : d
 desired_z : d
+
 # desired current velocity
 desired_vel_x : d
 desired_vel_y : d
 desired_vel_z : d
-# the number of loop iterations spent generating the current servo movement
-move_iterator : q
+
 
 # Stats about the performance, loop time, etc.
 loop_time : d
 iteration_time : d
 dropped_iterations : q # number of dropped loops (because of insufficient time)
-movement_duration : d
 main_loop_time : d
 t : d
 loop_iteration_time : q
 loop_iterator : q
 clock : d
 
-# The controller currently active (0=null field)
-controller : q
+#Protection
+distance_max : d
+distance_max_hold : d
+distance_max_move_to : d
+distance_max_play : d
+x_lim : d
+y_lim : d
+z_lim : d
+gap_iterator : d
+
 
 # Whether to write to the log
 write_log : q
-
-# Put this to 1 to have the robot quit itself.
-quit : q
+...

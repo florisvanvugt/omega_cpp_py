@@ -1,20 +1,24 @@
 
 import robot
 import time
+from sharedmem import *
 
 robot.launch()
 robot.init()
 
+STIFFNESS = 2000
+DAMPING = 20
 
-T = 1. # seconds
+T = 5. # seconds
+
 
 raw_input("Press <ENTER> to start capture")
-
 robot.start_capture()
+
 
 time.sleep(T)
 
-traj = robot.stop_capture()
+traj = robot.stop_capture(True)
 robot.unload()
 
 
