@@ -260,9 +260,10 @@ def active_to_null ():
 
 def start_capture():
     wshm('record_flag',1)
-    wshm('record_iterator',1)
+    wshm('record_iterator',0)
     wait_for_the_new_instruction(8)
 
+    
 # if end is true it will stop_capture and if it's false it will send the data without stop recording
 def stop_capture(end):
     if (end) :
