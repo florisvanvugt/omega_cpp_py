@@ -94,6 +94,9 @@ desired_vel_x : d
 desired_vel_y : d
 desired_vel_z : d
 
+# for arc tracing
+arc_dist : d
+
 
 # Stats about the performance, loop time, etc.
 loop_time : d

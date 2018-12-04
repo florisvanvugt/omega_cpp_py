@@ -128,7 +128,7 @@ void BasicRobot::openDevice() {
   // open the first available device
   if (dhdOpen () < 0) {
       printDebug ("Error: Cannot open device (%s)\n", dhdErrorGetLastStr());
-      printf ("Error: Cannot open device (%s) -- this can be because another robot process is active, if so, try killing it\n", dhdErrorGetLastStr());
+      printf ("Error: Cannot open device (%s) -- this can be because the robot is switched off (which has a fairly obvious fix) OR because another robot process is active (if so, try killing it with make kill)\n", dhdErrorGetLastStr());
       sh_live_memory->quit = 1;
   }
 

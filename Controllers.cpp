@@ -1,9 +1,9 @@
 #include "Controllers.h"
-#include <math.h>       /* pow, exp */
+#include <math.h>       /* pow, exp, min */
 #include "struct_shm.h"
 #include <iostream>
-
-
+#include <stdlib.h> /* abs */
+#include <stdio.h>
 
 
 /*
@@ -211,9 +211,12 @@ setforce_t* ControllerNullHoldX (shm_live_t* shm) {
 
 
 struct arcdist_t {
-  double y,z; // The closest point
+  double y,z; // The closest point on the arc
   double dist; // The corresponding distance
 };
+
+
+
 
 
 arcdist_t* dist_to_arc(double y,double z,double arcy,double arcz,double arcrad, bool upper) {
@@ -231,19 +234,20 @@ arcdist_t* dist_to_arc(double y,double z,double arcy,double arcz,double arcrad, 
   
   /* First, let's determine whether we are on the "right" side of the arc,
      i.e. if the arc extends upwards (in the z dimension), are we above it as well? */
-  if ( (upper && z>arcz) || (!upper && z<arcz)) {
+  if ( (upper && z>arcz) || ((!upper) && z<arcz)) {
     /* We are on the "correct" side of the arc, yay! */
 
-    // Compute the vector V from the center to the point (y,z)
+    // Compute the vector V from the center of the arc to the point (y,z)
     double vY = y-arcy;
     double vZ = z-arcz;
 
-    // Compute the magnitude of the V vector
-    double magV = sqrt(vY*vY + vZ*vZ);
+    // Compute the magnitude of the V vector, i.e. pointing to the center
+    double magV = sqrt(pow(vY,2) + pow(vZ,2));
+
+    arcd->dist = fabs(magV-arcrad); // the distance to the arc
 
     // Turn the v vector into a unit vector (v/|v|) and multiply it by the radius, that should get us
     // where we want to be.
-    arcd->dist = abs(magV-arcrad); // the distance to the arc
     arcd->y    = arcy + (vY/magV) * arcrad;
     arcd->z    = arcz + (vZ/magV) * arcrad;
 
@@ -252,11 +256,11 @@ arcdist_t* dist_to_arc(double y,double z,double arcy,double arcz,double arcrad, 
     /* Okay, this is if we are on the "wrong" side of the arc.
        In this case, the closest point to the arc is always one of the edges 
        (Emily proved this last summer). */
-    double dleftedge  = pow(y-(arcy-arcrad),2) + pow(z-arcz,2);
-    double drightedge = pow(y-(arcy+arcrad),2) + pow(z-arcz,2);
+    double dleftedge  = sqrt(pow(y-(arcy-arcrad),2) + pow(z-arcz,2));
+    double drightedge = sqrt(pow(y-(arcy+arcrad),2) + pow(z-arcz,2));
 
     if (dleftedge<drightedge) {
-      /* We're closest to the left edge */
+      /* We're closest to the left edge, so return that */
       arcd->dist   = dleftedge;
       arcd->y      = arcy-arcrad; 
     } else {
@@ -273,6 +277,8 @@ arcdist_t* dist_to_arc(double y,double z,double arcy,double arcz,double arcrad, 
 
 
 
+
+
 setforce_t* ControllerArcChannel(shm_live_t* shm) {
   /* This is a controller that is basically a force channel,
      but in the shape of an arc. */
@@ -280,21 +286,22 @@ setforce_t* ControllerArcChannel(shm_live_t* shm) {
   /* 
      Ok, so the idea is that we will, based on the subject's current position, we will compute
      the closest point in the arc, i.e. where they "should" be. We put that in 
-     shm->target_{x,y,z}
+     shm->desired_{x,y,z}
      and then compute_pd_forces will take care of computing the appropriate forces towards that.
   */
 
   /* Compute shm->target */
-  arcdist_t* leftdist  = dist_to_arc(shm->y,shm->z, shm->arc_base_y-shm->arc_radius, shm->arc_base_z, shm->arc_base_z, true);
-  arcdist_t* rightdist = dist_to_arc(shm->y,shm->z, shm->arc_base_y+shm->arc_radius, shm->arc_base_z, shm->arc_base_y, false);
+  arcdist_t* leftdist  = dist_to_arc(shm->y,shm->z, shm->arc_base_y-shm->arc_radius, shm->arc_base_z, shm->arc_radius, true);
+  //printf("Doing right\n");
+  arcdist_t* rightdist = dist_to_arc(shm->y,shm->z, shm->arc_base_y+shm->arc_radius, shm->arc_base_z, shm->arc_radius, false);
   
   if (leftdist->dist < rightdist->dist) { /* If the left arc is the closest to the current position, use that as the attractor */
-    shm->target_y = leftdist->y;  shm->target_z = leftdist->z;
+    shm->desired_y = leftdist->y;  shm->desired_z = leftdist->z;  shm->arc_dist = leftdist->dist;
   } else { /* Else, use the right arc as attractor */
-    shm->target_y = rightdist->y; shm->target_z = rightdist->z;
+    shm->desired_y = rightdist->y; shm->desired_z = rightdist->z; shm->arc_dist = rightdist->dist;
   }
-  shm->target_x = shm->arc_x_plane;
-  // So now we have set shm->target_{x,y,z}, time to continue!
+  shm->desired_x = shm->arc_x_plane;
+  // So now we have set shm->desired_{x,y,z}, time to continue!
 
   /* Get the corresponding PD forces for shm->target */
   return compute_pd_forces(shm);
