@@ -2,7 +2,6 @@
 #include <math.h>       /* pow, exp, min */
 #include "struct_shm.h"
 #include <iostream>
-#include <stdlib.h> /* abs */
 #include <stdio.h>
 
 
