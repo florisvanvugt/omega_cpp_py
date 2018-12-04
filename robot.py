@@ -92,7 +92,7 @@ def release():
     
 def wait_for_the_new_instruction( prefix ) :
     """
-    S here we let C++ know that there is a new instruction set,
+    So here we let C++ know that there is a new instruction set,
     and we (Python) wait until C++ has received it and put it in the live memory,
     so that we know that it is running the new instruction.
 

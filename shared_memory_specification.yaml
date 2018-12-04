@@ -20,14 +20,20 @@ movement_duration : d
 # Desired trajectory
 new_trajectory : q
 trajectory_size : d
-trajectory_x : 40000d
-trajectory_y : 40000d
-trajectory_z : 40000d
+trajectory_x : 5000d
+trajectory_y : 5000d
+trajectory_z : 5000d
 
 # starting location of the movement
 start_x : d
 start_y : d
 start_z : d
+
+# arc-shaped force channel specification
+arc_x_plane : d # the x-plane to which we restrict the arc
+arc_base_y : d
+arc_base_z : d
+arc_radius : d
 
 # the number of loop iterations spent generating the current servo movement
 move_iterator : q
@@ -73,9 +79,9 @@ vel_y : d
 vel_z : d
 
 # Functionality for recording the trajectories.
-record_x : 40000d
-record_y : 40000d
-record_z : 40000d
+record_x : 5000d
+record_y : 5000d
+record_z : 5000d
 
 
 # desired current position (changes over time)

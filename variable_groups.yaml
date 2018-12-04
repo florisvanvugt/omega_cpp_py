@@ -31,3 +31,7 @@
 
 # Unload
 10 : ["quit"]
+
+# Arc channel controller
+11 : ["arc_x_plane","arc_base_y","arc_base_z","arc_radius","controller"]
+

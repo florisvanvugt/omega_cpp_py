@@ -214,6 +214,17 @@ The number of that group is `2`, so within Python, when we send a new instructio
 
 
 
+### Practically speaking: adding a new controller with some variables
+
+Let's say you want to add a new controller with some new variables to communicate between Python (e.g. `rshm` or `wshm`) and the robot C++ code. Here is how:
+
+- Add the variable to `shared_memory_specification.yaml` (probably you want to add it to the instruction memory, i.e. the first portion)
+- Add the variable to the correct group in `variable_groups.yaml` or create a new group (probably if it's a new controller you'll want to add a new variable group), and remember the group ID for the next step.
+- Add the controller code to `Controllers.cpp`, this will be a function that looks like `setforce_t* <CONTROLLER_NAME> (shm_live_t* shm)` Essentially, the controller needs to compute the forces that you want the robot to exert (that is what goes in `setforce_t`). The robot code will take care of the rest.
+- Add a call to the controller in the `forceFromController` function. Remember which number you mapped to this controller, because you are going to need it below.
+- In your Python code, activate the controller with `wshm('controller',<ID>)` where `ID` is the ID that you mapped to the controller.
+- In your Python code, when you write the variable, use the correct group ID (`wshm('prefix',ID)`). This is done automatically by `robot.wait_for_new_instruction(ID)` where `ID` is the ID of the variable group that the variables are part of. (Note that you need to have added the `controller` variable to the variable group, otherwise it does not get updated).
+
 
 
 ## Protection

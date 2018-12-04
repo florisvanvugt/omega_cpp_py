@@ -197,15 +197,110 @@ setforce_t* ControllerActiveToNull(shm_live_t* shm) {
    }
   }
 
- setforce_t* ControllerNullHoldX (shm_live_t* shm) {
-   double stiffness = shm->stiffness;
-   double damping   = shm->damping;
-   shm->desired_x = shm->target_x;
-   shm->desired_vel_x = 0;
-   setforce_t *f = new setforce_t;
-   f->x = -stiffness*(shm->x - shm->desired_x) - damping*(shm->vel_x - shm->desired_vel_x);
-   return (f);
- }
+setforce_t* ControllerNullHoldX (shm_live_t* shm) {
+  double stiffness = shm->stiffness;
+  double damping   = shm->damping;
+  shm->desired_x = shm->target_x;
+  shm->desired_vel_x = 0;
+  setforce_t *f = new setforce_t;
+  f->x = -stiffness*(shm->x - shm->desired_x) - damping*(shm->vel_x - shm->desired_vel_x);
+  return (f);
+}
+
+
+
+
+struct arcdist_t {
+  double y,z; // The closest point
+  double dist; // The corresponding distance
+};
+
+
+arcdist_t* dist_to_arc(double y,double z,double arcy,double arcz,double arcrad, bool upper) {
+  /* 
+     Return the distance from the position (y,z) to an arc, centered at (arcy,arcz), and with
+     radius arcrad.
+     If upper is true, then the arc extends to zs that are greater than arcz, 
+     and if it's false, then the arc extends to zs that are smaller than arcz (that sounds
+     cryptical, sorry, I can't find a better way to say that).
+
+     Also returns the (y,z) position of the closest point on that arc.
+  */
+
+  arcdist_t* arcd = new arcdist_t;
+  
+  /* First, let's determine whether we are on the "right" side of the arc,
+     i.e. if the arc extends upwards (in the z dimension), are we above it as well? */
+  if ( (upper && z>arcz) || (!upper && z<arcz)) {
+    /* We are on the "correct" side of the arc, yay! */
+
+    // Compute the vector V from the center to the point (y,z)
+    double vY = y-arcy;
+    double vZ = z-arcz;
+
+    // Compute the magnitude of the V vector
+    double magV = sqrt(vY*vY + vZ*vZ);
+
+    // Turn the v vector into a unit vector (v/|v|) and multiply it by the radius, that should get us
+    // where we want to be.
+    arcd->dist = abs(magV-arcrad); // the distance to the arc
+    arcd->y    = arcy + (vY/magV) * arcrad;
+    arcd->z    = arcz + (vZ/magV) * arcrad;
+
+  } else {
+
+    /* Okay, this is if we are on the "wrong" side of the arc.
+       In this case, the closest point to the arc is always one of the edges 
+       (Emily proved this last summer). */
+    double dleftedge  = pow(y-(arcy-arcrad),2) + pow(z-arcz,2);
+    double drightedge = pow(y-(arcy+arcrad),2) + pow(z-arcz,2);
+
+    if (dleftedge<drightedge) {
+      /* We're closest to the left edge */
+      arcd->dist   = dleftedge;
+      arcd->y      = arcy-arcrad; 
+    } else {
+      arcd->dist   = drightedge;
+      arcd->y      = arcy+arcrad;
+    }
+    arcd->z = arcz;
+    
+  }
+  return arcd;
+  
+}
+
+
+
+
+setforce_t* ControllerArcChannel(shm_live_t* shm) {
+  /* This is a controller that is basically a force channel,
+     but in the shape of an arc. */
+
+  /* 
+     Ok, so the idea is that we will, based on the subject's current position, we will compute
+     the closest point in the arc, i.e. where they "should" be. We put that in 
+     shm->target_{x,y,z}
+     and then compute_pd_forces will take care of computing the appropriate forces towards that.
+  */
+
+  /* Compute shm->target */
+  arcdist_t* leftdist  = dist_to_arc(shm->y,shm->z, shm->arc_base_y-shm->arc_radius, shm->arc_base_z, shm->arc_base_z, true);
+  arcdist_t* rightdist = dist_to_arc(shm->y,shm->z, shm->arc_base_y+shm->arc_radius, shm->arc_base_z, shm->arc_base_y, false);
+  
+  if (leftdist->dist < rightdist->dist) { /* If the left arc is the closest to the current position, use that as the attractor */
+    shm->target_y = leftdist->y;  shm->target_z = leftdist->z;
+  } else { /* Else, use the right arc as attractor */
+    shm->target_y = rightdist->y; shm->target_z = rightdist->z;
+  }
+  shm->target_x = shm->arc_x_plane;
+  // So now we have set shm->target_{x,y,z}, time to continue!
+
+  /* Get the corresponding PD forces for shm->target */
+  return compute_pd_forces(shm);
+}
+
+
 
 
 
@@ -229,6 +324,8 @@ setforce_t* forceFromController(shm_live_t* shm) {
     return ControllerActiveToNull (shm); break;
   case 6:
     return ControllerNullHoldX (shm); break;
+  case 7:
+    return ControllerArcChannel (shm); break;
   };
 
   return ControllerNull(); // Default: if an invalid controller is specified
