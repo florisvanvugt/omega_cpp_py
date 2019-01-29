@@ -39,12 +39,12 @@ def launch(basedir=None):
         global robot_dir
         robot_dir = basedir
 
-    if not os.path.isfile('./run_robot.sh'):
-       print("The script ./run_robot.sh should exist - your installation seems to be broken.")
-       sys.exit(-1)
-    if not os.path.isfile('./Robot'):
-       print("The robot executable ./Robot should exist - maybe try 'make' to compile the robot code?")
-       sys.exit(-1)
+    #if not os.path.isfile('./run_robot.sh'):
+    #   print("The script ./run_robot.sh should exist - your installation seems to be broken.")
+    #   sys.exit(-1)
+    #if not os.path.isfile('./Robot'):
+    #   print("The robot executable ./Robot should exist - maybe try 'make' to compile the robot code?")
+    #   sys.exit(-1)
 
     out = subprocess.Popen('sudo ./run_robot.sh',cwd=robot_dir,shell=True)
     outp= out.communicate()[0]

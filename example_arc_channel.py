@@ -9,7 +9,7 @@ robot.init()   # initialises shared memory
 ## Communicate some basic parameters to the robot
 conf = {}
 # The arc defines the path to be followed and will be drawn on the screen using lines.
-conf["ARC_RADIUS"] = .005 # the radius of the arc in robot coordinates (m)
+conf["ARC_RADIUS"] = .025 # the radius of the arc in robot coordinates (m)
 conf["ARC_BASE_X"] = 0 # the x position of the center of the arc (robot Y dimension)
 conf["ARC_BASE_Y"] = 0 # the y position of the targets (in robot coordinates) (robot Z dimension)
 
