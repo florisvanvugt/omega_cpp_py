@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <comedilib.h>
 
 
 #include "include/dhdc.h"
@@ -19,6 +20,16 @@
 #define SHM_LIVE_FILEPATH "/tmp/sharedlivememory.bin" // the same idea but we removed instruction from live informations (position, velocity...)
 
 #define DEBUG_FILENAME "robot_debug.txt" // the filename for a debug log
+
+
+// Pertaining to FT sensor reading through COMEDI
+#define COMEDI_DEV "/dev/comedi0"
+#define COMEDI_SUBDEVICE 0
+#define COMEDI_RANGE 0 // this defines the voltage range that we read, zero is the largest range (-10 to +10V we believe)
+#define COMEDI_AREF AREF_GROUND
+#define COMEDI_NCHANNELS 16 // how many channels to record from
+
+
 
 using namespace std;
 
@@ -42,11 +53,19 @@ class BasicRobot
   void openDebug();
   void printDebug(const char* data,...);
   void closeDebug();
+
+  // Functions pertaining to reading the FT sensors through Comedi
+  void openComedi();
+  void readComedi();
+  void closeComedi();
+  
  protected:
   shm_instr_t *sh_instr_memory;
   shm_live_t *sh_live_memory;
+  comedi_t *comedidev;
  private:
   FILE* debugfp;
+
   //ofstream debugfp;
 
 };

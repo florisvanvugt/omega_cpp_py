@@ -42,7 +42,7 @@ schema.png: schema.svg
 
 
 robot : Robot.cpp Robot.h BasicRobot.cpp BasicRobot.h Controllers.cpp  instruction.cpp instruction.h struct_shm.h lib include/dhdc.h
-	g++ Robot.cpp BasicRobot.cpp Controllers.cpp instruction.cpp  -o Robot -Llib -ldhd$(ROBOT_TYPE) -lrt -lpthread -lusb-1.0 -Wall
+	g++ Robot.cpp BasicRobot.cpp Controllers.cpp instruction.cpp  -o Robot -Llib -ldhd$(ROBOT_TYPE) -lrt -lpthread -lusb-1.0 -lcomedi -lm -Wall
 
 run: robot
 	python example_play_traj.py

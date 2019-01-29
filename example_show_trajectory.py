@@ -3,6 +3,8 @@ import robot
 import time
 from sharedmem import *
 
+import matplotlib.pyplot as plt
+
 robot.launch()
 robot.init()
 
@@ -18,12 +20,20 @@ robot.start_capture()
 
 time.sleep(T)
 
-traj = robot.stop_capture(True)
+capt = robot.stop_capture(True)
+traj = capt["traj"]
+ft   = capt["ft"]
+
+#ft = np.array(ft,shape=(len(traj),robot.FT_NCHANNELS))
+ft = np.array(ft).reshape(len(traj),robot.FT_NCHANNELS)
+
+plt.plot(ft)
+plt.show()
+
+
 robot.unload()
 
 
-
-import matplotlib.pyplot as plt
 
 plt.plot(traj)
 (x,y,z)=traj[-1]

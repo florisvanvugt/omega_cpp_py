@@ -214,9 +214,14 @@ void launch() {
   // Launch the robot
   robot.openDevice();
 
+  // Launch the comedi interface (if enabled)
+  robot.openComedi();
+  //robot.readComedi();
+  
   // Launch the main loop
   robot.mainLoop();
 
+  // This is after we've finished (for example when the user quits the robot)
   robot.close_sharedmem();
   robot.closeDevice();
 

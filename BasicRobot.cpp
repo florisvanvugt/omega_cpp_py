@@ -5,7 +5,6 @@
 
 
 
-
 BasicRobot::BasicRobot()
 {
 }
@@ -183,7 +182,33 @@ void BasicRobot::recordPosition() {
        (sh_live_memory->record_x)[sh_live_memory->record_iterator] = (sh_live_memory->x);
        (sh_live_memory->record_y)[sh_live_memory->record_iterator] = (sh_live_memory->y);
        (sh_live_memory->record_z)[sh_live_memory->record_iterator] = (sh_live_memory->z);
+
+
+       // Now record the FT samples in the same way
+       int i;
+       int retval;
+       int chan; // the channel we are currently reading
+       lsampl_t data;
+       comedi_range *rangetype;
+       lsampl_t maxdata;
+       double volts;
+	
+       for (chan=0; chan<COMEDI_NCHANNELS; chan++)
+	 {
+	   retval      = comedi_data_read(comedidev, COMEDI_SUBDEVICE, chan, COMEDI_RANGE, COMEDI_AREF, &data);
+	   if(retval < 0) { comedi_perror("comedi_data_read"); }
+	   rangetype   = comedi_get_range(comedidev,COMEDI_SUBDEVICE,chan,COMEDI_RANGE);
+	   maxdata     = comedi_get_maxdata(comedidev,COMEDI_SUBDEVICE,chan);
+	   volts       = comedi_to_phys(data,rangetype,maxdata);
+
+	   // Where does this go in the record_ft?
+	   i = sh_live_memory->record_iterator*COMEDI_NCHANNELS + chan;
+	   (sh_live_memory->record_ft)[i] = volts;
+	   
+	 }
+       
        sh_live_memory->record_iterator = sh_live_memory->record_iterator+1;
+       
      }
    }
 }
@@ -248,3 +273,46 @@ void BasicRobot::closeDebug() {
   fflush(debugfp);
   fclose(debugfp);
 }
+
+
+
+
+
+/*
+ *
+ *
+ * Stuff that relates to reading Force-Torque sensors through Comedi
+ *
+ *
+ */
+
+
+void BasicRobot::openComedi() {
+  
+  comedidev = comedi_open(COMEDI_DEV);
+  if(comedidev == NULL) {
+    comedi_perror("comedi_open");
+  }
+  
+}
+
+
+void BasicRobot::readComedi() {
+  int retval;
+  lsampl_t data;
+  int chan = 0;		        /* change this to your channel */
+  retval = comedi_data_read(comedidev, COMEDI_SUBDEVICE, chan, COMEDI_RANGE, COMEDI_AREF, &data);
+  if(retval < 0) {
+    comedi_perror("comedi_data_read");
+  }
+  printf("%d\n", data);
+  
+}
+
+
+
+void BasicRobot::closeComedi() {
+}
+
+
+

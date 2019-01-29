@@ -47,7 +47,7 @@ active_to_null : d
 
 # Functionality for recording the trajectories.
 record_flag : q   # whether we are currently recording
-record_iterator : q
+record_iterator : q  # pointer to where in the buffer we are currently writing the recorded samples
 
 # The controller currently active (0=null field)
 controller : q
@@ -82,7 +82,7 @@ vel_z : d
 record_x : 5000d
 record_y : 5000d
 record_z : 5000d
-
+record_ft : 80000d
 
 # desired current position (changes over time)
 desired_x : d

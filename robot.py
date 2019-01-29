@@ -19,6 +19,9 @@ robot_dir = os.path.dirname(os.path.realpath(__file__))
 #robot_dir = "."
 
 
+FT_NCHANNELS = 16 # how many channels worth of data we are capturing (this has to match with COMEDI_NCHANNELS in the robot C++ code)
+
+
 def init():
     """ Initialises the robot and the shared memory """
     init_specifications(robot_dir)
@@ -279,12 +282,16 @@ def stop_capture(end):
     trajx = rshm('record_x')
     trajy = rshm('record_y')
     trajz = rshm('record_z')
+    trajft = rshm('record_ft')
     iterator = rshm('record_iterator')
 
     wshm ('prefix',9)
     inst = rshm('instruction_no')
     wshm('instruction_no',inst+1)
 
-    return zip(trajx[:iterator],trajy[:iterator],trajz[:iterator])
-    #return ... # trajectory that was captured
+    ft = trajft[:FT_NCHANNELS*iterator]
+    
+    return {"traj":zip(trajx[:iterator],trajy[:iterator],trajz[:iterator]),
+            "ft":ft}
+    #return trajectory that was captured
 

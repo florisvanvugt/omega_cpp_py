@@ -4,6 +4,8 @@
 #include <iostream>
 #include <stdio.h>
 
+#include <comedilib.h>
+
 
 /*
    Compute the target position corresponding to the current time
