@@ -138,7 +138,9 @@ void BasicRobot::openDevice() {
 
   // set gravity compensation
   dhdSetGravityCompensation(DHD_ON);
-  dhdSetStandardGravity (12);
+  dhdSetStandardGravity (15);
+  // use 15 for the heavy ball that someone made for us (don't ask)
+  // use 12 for the "cylindrical handle" or ball with the support clamp (whatever that means, people will be wondering for centuries from now...)
 
   // release brakes!
   dhdSetBrakes(DHD_OFF);
